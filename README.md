@@ -1,4 +1,4 @@
-Krotki	opis	problemu:	
+# Krotki	opis	problemu:	
 Problem	dotyczy	 optymalizacji	harmonogramu	pracy	personelu	medycznego	w	szpitalu.	
 Konkretny	przyklad	jest	wziety	z	literatury	technicznej	i dotyczy	szczegolnych	wymogow	
 w	 szpitalach	 Holenderskich.	 Nalezy	 zoptymalizowac	 harmonogram	 pracy	 dla	 16	
@@ -14,8 +14,6 @@ przez	stopien	spelnienia	tych	dodatkowych	warunkow.
 
 
 
-
-# # ~~~~~~~~~~~~~~~~~~~~~ANALIZA~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 # Analiza algorytmu genetycznego
 Dane: tablica 16 x [(28 + 35 = 63)x4]
