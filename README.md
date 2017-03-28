@@ -16,6 +16,7 @@ przez	stopien	spelnienia	tych	dodatkowych	warunkow.
 
 
 # Analiza algorytmu genetycznego
+```
 Dane: tablica 16 x [(28 + 35 = 63)x4]
 czyli: p x z, gdzie p=16, z=252
 Dla 9 tygodni mamy tablice z 4032 polami.
@@ -47,7 +48,7 @@ switch(z % 4){
 	case 2: "zmiana Late(L): 14:00 - 23:00"
 	case 3: "zmiana Night(N): 23:00 - 7:00"
 }
-
+```
 ## Osobnik?
 To będzie jedna taka tabela:
 typedef bool osobnik[NURSE_NUMBER][SHIFTS_NUMBER];
