@@ -48,18 +48,18 @@ switch(z % 4){
 	case 3: "zmiana Night(N): 23:00 - 7:00"
 }
 
-# Osobnik?
+## Osobnik?
 To będzie jedna taka tabela:
 typedef bool osobnik[NURSE_NUMBER][SHIFTS_NUMBER];
 
-# Populacja?
+## Populacja?
 osobnik populacja[POPULATION_SIZE];
 
-# Chromosom?
+## Chromosom?
 ja to widzę jako komórkę w naszej tabeli: false(0), true(1)
 
 
-# PSEUDOKOD
+## PSEUDOKOD
 doneTablePart = import from "stary schedule"; // pobieramy skads 4 ostatnie tygodnie
 
 #define POPULATION_SIZE 100; //liczba takich tabel jak powyżej
@@ -85,8 +85,8 @@ void sortPopulation(populacja *pop, scores[][]) {}
 osobnik crossUnits() { return crossedUnit; }
 population mutatePopulation(populacja *pop, ratio) {}
 
-# ETAPY ALGORYTMU
-1. Losowanie populacji
+## ETAPY ALGORYTMU
+###1. Losowanie populacji
 
 foreach(osobnik in populacja) {
 	setDonePartOfTable(&osobnik, doneTablePart);
@@ -96,7 +96,7 @@ foreach(osobnik in populacja) {
 	}
 }
 
-2. Ocena osobników
+###2. Ocena osobników
 
 if(isDefined(crossedPopulation)) populacja = crossedPopulation;
 
@@ -111,14 +111,14 @@ foreach(osobnik in populacja) {
 
 sortPopulation(&populacja, scores);
 
-3. Selekcja
+###3. Selekcja
 
 osobnik newPopulation[POPULATION_SIZE];
 for (int i; i<population.size/2; i++) {
 	newPopulation.push(population[i]); //nowa populacja bedzie zawierac tylko najlepsze osobniki
 }
 
-4. Krzyżowanie
+###4. Krzyżowanie
 
 osobnik crossedPopulation[POPULATION_SIZE*2]; //nowa tablica ze skrosowanymi i starymi
 
@@ -133,12 +133,12 @@ for (int i=0; i<POPULATION_SIZE; i++) {
 	crossedPopulation.push(newPopulation[i]); // i starego tez, bo dobry byl w miare xD
 }
 
-5. Mutacja
+###5. Mutacja
 
 int ratio = POPULATION_SIZE/4; //np mutujemy tylko 1/8 naszych osobników
 mutatePopulation(&crossedPopulation, ratio);
 
-6. Powrót do punktu 2
+###6. Powrót do punktu 2
 
 
-# # ~~~~~~~~~~~~~~~~~~~~KONIEC ANALIZY~~~~~~~~~~~~~~~~~~~~~~~ #
+## KONIEC ANALIZY
