@@ -1,21 +1,17 @@
 package nsp;
 
 public class Nurse {
-//xd
+
 	 int id;
 	 int hoursPerWeek;
-
 	 int nightShiftThisWeekend;
 	 public int nightShiftsThisPeriod;
 	 int consecutiveNightShifts;
 	 public boolean workedYesterday;
-
 	 int consecutiveShifts;
 	 int totalWorkedTime;
 	 public int workingWeekends;
-	
 	 boolean exceptionForRestAfterNightShift;
-	
 	 boolean startedShiftToday;
 
 
@@ -25,7 +21,19 @@ public class Nurse {
 		this.hoursPerWeek = hoursPerWeek;
 	}
 	
-	
+	public Nurse copyNurse(){
+		Nurse copy = new Nurse(id, hoursPerWeek);
+		copy.nightShiftThisWeekend = nightShiftThisWeekend;
+		copy.consecutiveNightShifts = consecutiveNightShifts;
+		copy.workedYesterday = workedYesterday;
+		copy.consecutiveShifts = consecutiveShifts;
+		copy.totalWorkedTime = totalWorkedTime;
+		copy.workingWeekends = workingWeekends;
+		copy.exceptionForRestAfterNightShift = exceptionForRestAfterNightShift;
+		copy.startedShiftToday = startedShiftToday;
+		
+		return copy;
+	}
 
 	
 }

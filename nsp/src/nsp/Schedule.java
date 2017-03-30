@@ -7,6 +7,7 @@ import dataflow.ExportScheduleToHtml;
 public class Schedule {
 	
 	int [][]schedule;
+	int [][]scheduleBackup;
 	double finess;
 	
 	Constraints constraint;
@@ -18,6 +19,19 @@ public class Schedule {
 		for(int i=0; i<16; i++)
 			for(int j=0; j<35*4; j++)
 				schedule[i][j] = 0;
+	}
+	
+	
+	public void backupSchedule(){
+		scheduleBackup = new int[16][35*4];
+		constraint = new Constraints();
+		for(int i=0; i<16; i++)
+			for(int j=0; j<35*4; j++)
+				scheduleBackup[i][j] = this.schedule[i][j];
+	}
+	
+	public void backupNurses(){
+		NurseManager.backupNurses();
 	}
 	
 	public Schedule(int [][] schedule){
@@ -131,23 +145,38 @@ public class Schedule {
 			if(shift % 4 == 0)
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
 			
+			if(shift==11){
+				System.out.println("wdwd");
+			}
+			lastScheduledNurse = 0;
+			nursesScheduledForTheDay = 0;
 			for(int nurseId=0; nurseId < 16; nurseId++){
 				if(constraint.checkSchedule(nurseId, shift, schedule)){
-					setSchedule(shift, nurseId);
+					setSchedule(nurseId, shift);
+
 					nursesScheduledForTheDay++;
 					lastScheduledNurse = nurseId;
+					ExportScheduleToHtml export = new ExportScheduleToHtml(getAllSchedule());
+					export.exportScheduleToHtml();
 					
 					if(nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)){
+						backupSchedule();
+						backupNurses();
 						break;						
 					}
 				}
 
 				else{
-					nurseId = lastScheduledNurse + 1;
-					failedAttemptsToSetNurse++;
+
+					if(nurseId >= 15){
+						
+						failedAttemptsToSetNurse++;
+						nurseId = 0;
+						NurseManager.allNurses = NurseManager.allNursesBackup;
+						NurseManager.allNursesBackup = null;
+					}
 					if(failedAttemptsToSetNurse > 100){
-						ExportScheduleToHtml export = new ExportScheduleToHtml(getAllSchedule());
-						export.exportScheduleToHtml();
+
 						throw new Exception("Failed to generate. For nurse: " + nurseId + " shift: " + shift);
 						
 					}

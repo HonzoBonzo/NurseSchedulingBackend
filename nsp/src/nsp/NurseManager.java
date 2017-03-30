@@ -2,7 +2,8 @@ package nsp;
 
 public class NurseManager {
 
-	private static Nurse[] allNurses = new Nurse[16];
+	public static Nurse[] allNurses = new Nurse[16];
+	public static Nurse[] allNursesBackup;
 	
 	public static void initializeNurses(){
 		for(int i=0; i<12; i++)
@@ -16,6 +17,17 @@ public class NurseManager {
 	
 	public static Nurse getNurse(int index){
 		return allNurses[index];
+	}
+	
+	public static void backupNurses(){
+		allNursesBackup = new Nurse[16];
+		for(int i=0; i<12; i++)
+			allNursesBackup[i] = allNurses[i].copyNurse();
+		
+		allNursesBackup[12] = allNurses[12].copyNurse();	
+		allNursesBackup[13] =  allNurses[13].copyNurse();
+		allNursesBackup[14] = allNurses[14].copyNurse();
+		allNursesBackup[15] =  allNurses[15].copyNurse();
 	}
 	
 	
