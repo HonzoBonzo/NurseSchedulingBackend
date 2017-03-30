@@ -86,10 +86,10 @@ int checkSoftConstraints(osobnik os) { return liczba; }
 void sortPopulation(populacja *pop, scores[][]) {}
 osobnik crossUnits() { return crossedUnit; }
 population mutatePopulation(populacja *pop, ratio) {}
-
+```
 ## ETAPY ALGORYTMU
 ### 1. Losowanie populacji
-
+```
 foreach(osobnik in populacja) {
 	setDonePartOfTable(&osobnik, doneTablePart);
 	for (int i=0; i<NURSE_NUMBER; i++) {
