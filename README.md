@@ -12,7 +12,7 @@ przez	stopien	spelnienia	tych	dodatkowych	warunkow.
 
 
 
-
+--
 
 
 # Analiza algorytmu genetycznego
