@@ -32,9 +32,11 @@ Pola na osi OZ 112 - 251 musi wyliczyć algorytm
 
 o - tablica
 o = p x z
+```
 
-![alt tag](https://github.com/HonzoBonzo/NurseSchedulingBackend/mboryczko/table.jpg)
+![alt tag](https://github.com/HonzoBonzo/NurseSchedulingBackend/tree/kbysiek/table.jpg)
 
+```
 switch(z % 4){
 	case 0: "zmiana Day(D): 8:00 - 17:00"
 	case 1: "zmiana Early(E): 7:00 - 17:00"
