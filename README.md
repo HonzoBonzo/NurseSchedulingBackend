@@ -46,11 +46,13 @@ switch(z % 4){
 ```
 ## Osobnik?
 To będzie jedna taka tabela:
+```
 typedef bool osobnik[NURSE_NUMBER][SHIFTS_NUMBER];
-
+```
 ## Populacja?
+```
 osobnik populacja[POPULATION_SIZE];
-
+```
 ## Chromosom?
 ja to widzę jako komórkę w naszej tabeli: false(0), true(1)
 
