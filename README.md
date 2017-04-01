@@ -33,14 +33,7 @@ Pola na osi OZ 112 - 251 musi wyliczyć algorytm
 o - tablica
 o = p x z
 
-  p
-  /\
-15|	x 	o 	x 	o 	...	o 	x 	?	? 	... ? 	?
-..|	.. 	.. 	.. 	..	...	.. 	.. 	..	.. 	... ..	..
-..|	.. 	.. 	.. 	..	...	.. 	.. 	..	.. 	... .. 	..
- 0|	x 	o 	o 	x 	...	o 	x 	?	?	... ? 	?
-  |_________________________________________________\ z
- 	0	1	2	3	...	110	111	112	113	...	250	251	/
+![alt tag](https://github.com/HonzoBonzo/NurseSchedulingBackend/mboryczko/table.jpg)
 
 switch(z % 4){
 	case 0: "zmiana Day(D): 8:00 - 17:00"
