@@ -34,7 +34,7 @@ o - tablica
 o = p x z
 ```
 
-![alt tag](https://github.com/HonzoBonzo/NurseSchedulingBackend/tree/kbysiek/table.jpg)
+![alt tag](https://github.com/HonzoBonzo/NurseSchedulingBackend/blob/kbysiek/table.jpg)
 
 ```
 switch(z % 4){
