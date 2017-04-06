@@ -54,7 +54,7 @@ typedef bool osobnik[NURSE_NUMBER][SHIFTS_NUMBER];
 osobnik populacja[POPULATION_SIZE];
 ```
 ## Chromosom?
-ja to widzę jako komórkę w naszej tabeli: false(0), true(1)
+jedna cała tabela z wartściami: false(0), true(1)
 
 
 ## PSEUDOKOD
