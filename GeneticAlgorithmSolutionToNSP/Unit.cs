@@ -39,9 +39,7 @@ namespace GeneticAlgorithmSolutionToNSP
             {
                 for (int j = Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX; j < Constants.SHIFTS_NUMBER; j++)
                 {
-                    Random randomGen = new Random();
-                    bool val = randomGen.Next(2) == 1 ? true : false;
-                    this.array[i, j] = val;
+                    this.array[i, j] = randBool();
                 }
             }
         }
@@ -55,21 +53,43 @@ namespace GeneticAlgorithmSolutionToNSP
             this.failedSoftConstraints = soft.Failed;
         }
 
-        public Unit Mutate(float ratio)
+        private bool randBool()
         {
-            int numberToMutate = (int)(ratio * Constants.FIELDS_NUMBER);
+            Random randomGen = new Random();
+            /* losujemy od 0 - 16 liczbe, dla 0 zwracamy true czyli x w naszym grafiku, false'ow jest duzo wiecej */
+            bool val = randomGen.Next(Constants.MAX_RANDOM_NUMBER_BOOL) == 0 ? true : false;
+            return val;
+        }
+
+        private int randNurse()
+        {
+            Random randGen = new Random();
+            return randGen.Next(Constants.NURSE_NUMBER); ;
+        }
+
+        private int randShift()
+        {
+            Random randGen = new Random();
+            return randGen.Next(Constants.SHIFTS_TO_SCHEDULE_NUMBER) + Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX;
+        }
+
+        public Unit Mutate()
+        {
+            int numberToMutate = Constants.UNIT_MUTATION_NUMBER;
             
             while (numberToMutate != 0)
             {
-                Random randGen = new Random();
-                int randomNurse = randGen.Next(Constants.NURSE_NUMBER);
-                int randomShift = randGen.Next(Constants.SHIFTS_NUMBER) + Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX;
+                int randomNurse = randNurse();
+                int randomShift = randShift();
                 //wiem ze moze sie ten sam zmutowac kilka razy, ale w czym to przeszkadza?
                 this.array[randomNurse, randomShift] = !this.array[randomNurse, randomShift];
                 numberToMutate--;
             }
             return this;
         }
+
+        public int FailedHardConstraints { get { return this.failedHardConstraints; } }
+        public int FailedSoftConstraints { get { return this.failedSoftConstraints; } }
     }
 
 

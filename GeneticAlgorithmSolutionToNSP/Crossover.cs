@@ -13,5 +13,10 @@ namespace GeneticAlgorithmSolutionToNSP
             //TODO
             throw new NotImplementedException();
         }
+
+        internal void makeCrossover(Unit[] unit)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

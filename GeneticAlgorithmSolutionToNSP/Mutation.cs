@@ -8,10 +8,14 @@ namespace GeneticAlgorithmSolutionToNSP
 {
     class Mutation
     {
-        internal void makeMutation(List<Unit> list)
+        public Mutation() { }
+
+        internal void makeMutation(Unit[] unitArr)
         {
-            //TODO
-            throw new NotImplementedException();
+            for (int i = 0; i < Constants.POPULATION_MUTATION_NUMBER; i++)
+            {
+                unitArr[i].Mutate();
+            }
         }
     }
 }

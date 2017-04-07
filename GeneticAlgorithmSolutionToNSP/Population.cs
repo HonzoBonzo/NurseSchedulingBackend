@@ -8,7 +8,7 @@ namespace GeneticAlgorithmSolutionToNSP
 {
     class Population : Unit
     {
-        List<Unit> population;
+        Unit[] arr;
         Selection selectionMethod;
         Crossover crossoverMethod;
         Mutation mutationMethod;
@@ -18,7 +18,7 @@ namespace GeneticAlgorithmSolutionToNSP
             this.selectionMethod = new Selection();
             this.crossoverMethod = new Crossover();
             this.mutationMethod = new Mutation();
-            this.population = initPopulation();
+            this.arr = initPopulation();
         }
 
         public Population(Selection s, Crossover c, Mutation m)
@@ -26,26 +26,24 @@ namespace GeneticAlgorithmSolutionToNSP
             this.selectionMethod = s;
             this.crossoverMethod = c;
             this.mutationMethod = m;
-            this.population = initPopulation();
+            this.arr = initPopulation();
         }
 
         public void SimulateAlgorithm() {
             for (int i = 0; i < Constants.EPOCHS_NUMBER; i++)
             {
-                simulateEpoch();
+                selectionMethod.makeSelection(this.arr);
+                crossoverMethod.makeCrossover(this.arr);
+                mutationMethod.makeMutation(this.arr);
             }
         }
 
-        private List<Unit> initPopulation()
+        private Unit[] initPopulation()
         {
-            return new List<Unit>(Constants.POPULATION_SIZE);
+            return new Unit[Constants.POPULATION_SIZE];
         }
 
-        private void simulateEpoch() {
-            selectionMethod.makeSelection(this.population);
-            crossoverMethod.makeCrossover(this.population);
-            mutationMethod.makeMutation(this.population);
-        }
+        public Unit[] Array { get { return this.arr; } }
 
     }
 }
