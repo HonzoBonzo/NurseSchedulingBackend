@@ -46,10 +46,10 @@ namespace GeneticAlgorithmSolutionToNSP
 
         void rateStrength()
         {
-            HardConstraints hard = new HardConstraints(this);
+            HardConstraints hard = new HardConstraints(this.array);
             this.failedHardConstraints = hard.Failed;
 
-            SoftConstraints soft = new SoftConstraints(this);
+            SoftConstraints soft = new SoftConstraints(this.array);
             this.failedSoftConstraints = soft.Failed;
         }
 

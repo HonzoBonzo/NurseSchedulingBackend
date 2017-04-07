@@ -8,13 +8,9 @@ namespace GeneticAlgorithmSolutionToNSP
 {
     class Crossover
     {
-        internal void makeCrossover(List<Unit> list)
-        {
-            //TODO
-            throw new NotImplementedException();
-        }
+        public Crossover() { }
 
-        internal void makeCrossover(Unit[] unit)
+        internal void MakeCrossover(Unit[] unit)
         {
             throw new NotImplementedException();
         }

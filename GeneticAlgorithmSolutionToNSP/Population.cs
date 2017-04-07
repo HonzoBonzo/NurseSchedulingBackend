@@ -32,8 +32,8 @@ namespace GeneticAlgorithmSolutionToNSP
         public void SimulateAlgorithm() {
             for (int i = 0; i < Constants.EPOCHS_NUMBER; i++)
             {
-                selectionMethod.makeSelection(this.arr);
-                crossoverMethod.makeCrossover(this.arr);
+                selectionMethod.MakeSelection(this.arr);
+                crossoverMethod.MakeCrossover(this.arr);
                 mutationMethod.makeMutation(this.arr);
             }
         }

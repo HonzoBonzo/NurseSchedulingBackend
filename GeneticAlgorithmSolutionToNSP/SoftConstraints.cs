@@ -5,48 +5,83 @@ using System.Text;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class SoftConstraints
+    class SoftConstraints : Constraint
     {
+        private bool[,] arr;
+
         public SoftConstraints() : base(){}
 
         public SoftConstraints(Unit unit)
         {
-            Constraint1(unit);
-            Constraint2(unit);
-            Constraint3(unit);
-            Constraint4(unit);
-            Constraint5(unit);
-            Constraint6(unit);
+            Constraint1();
+            Constraint3();
+            Constraint6();
+            Constraint8();
+            Constraint11();
+            Constraint12();
         }
 
-        private void Constraint6(Unit unit)
+        public SoftConstraints(bool[,] p)
         {
-            throw new NotImplementedException();
+            this.arr = p;
         }
 
-        private void Constraint5(Unit unit)
+        /* 
+        An early shift after a day shift should be avoided.
+         */
+        private void Constraint12()
         {
-            throw new NotImplementedException();
+            this.failed++;
         }
 
-        private void Constraint4(Unit unit)
+        /* 
+        For all employees the length of a series of  late    
+        shifts should be within the range of  2-3. It  could   be  
+        within  another series.
+         */
+        private void Constraint11()
         {
-            throw new NotImplementedException();
+            this.failed++;
         }
 
-        private void Constraint3(Unit unit)
+        /* 
+        For employees   with    availability    of  30-48   hours   per 
+        week,   the length  of  a   series  of  shifts  should  be  within  
+        the range   of  4-6.
+         */
+        private void Constraint8()
         {
-            throw new NotImplementedException();
+            this.failed++;
         }
 
-        private void Constraint2(Unit unit)
+        /* 
+        For employees   with    availability    of  30-48   hours   per 
+        week,   within  one week    the number  of  shifts  is  within  
+        the range   4- 5.
+         */
+        private void Constraint6()
         {
-            throw new NotImplementedException();
+            this.failed++;
         }
 
-        private void Constraint1(Unit unit)
+        /* 
+        For employees   with    availability    of  30-48   hours   per 
+        week,   the length  of  a   series  of  night   shifts  should  be  
+        within  the range   2-3.    It  could   be  before  another series.
+         */
+        private void Constraint3()
         {
-            throw new NotImplementedException();
+            this.failed++;
+        }
+
+        /* 
+        For the period  of  Friday  22:00   to  Monday  0:00    a   
+        nurse   should  have    either  no  shifts  or  at  least   2   shifts  
+        (‘Complete  Weekend’).
+         */
+        private void Constraint1()
+        {
+            this.failed++;
         }
 
         public int Failed { get; set; }
