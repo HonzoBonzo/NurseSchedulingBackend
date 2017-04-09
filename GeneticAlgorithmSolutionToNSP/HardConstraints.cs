@@ -25,6 +25,14 @@ namespace GeneticAlgorithmSolutionToNSP
             {
                 for (int shift = 0; shift < Constants.SHIFTS_NUMBER; shift++)
                 {
+                    this.setSchedule(nurseId, shift);
+                }
+            }
+
+            for (int nurseId = 0; nurseId < Constants.NURSE_NUMBER; nurseId++)
+            {
+                for (int shift = 0; shift < Constants.SHIFTS_NUMBER; shift++)
+                {
                     this.nurseId = nurseId;
                     this.shift = shift;
 		            this.nurse = NurseManager.getNurse(nurseId);
@@ -53,6 +61,38 @@ namespace GeneticAlgorithmSolutionToNSP
 
 
 	    }
+
+        public void setSchedule(int nurseId, int shift)
+        {
+            Nurse nurse = NurseManager.getNurse(nurseId);
+            bool isWeekend = NurseCalculations.checkIfItIsTheWeekend(shift);
+            bool isNightShift = NurseCalculations.isNightShift(shift);
+
+            int yesterday = NurseCalculations.convertShiftToDay(shift) - 1;
+            NurseCalculations.dayOfTheWeek(yesterday);
+
+            nurse.consecutiveShifts++;
+            nurse.totalWorkedTime += 8;
+
+
+            if (isWeekend)
+            {
+                if (yesterday != 5)
+                    nurse.workingWeekends++;
+                //jesli jest rowny 5, to wczoraj byl weekend i juz ta zmianna
+                //nie powinna byc zwiekszana
+            }
+
+            if (isNightShift)
+            {
+                nurse.consecutiveNightShifts++;
+                nurse.nightShiftsThisPeriod++;
+                nurse.nightShiftThisWeekend++;
+            }
+
+            nurse.workedYesterday = true;
+            //this.arr[nurseId,shift] = true;
+        }
 
         /*
          * For each day a nurse may start only one shift

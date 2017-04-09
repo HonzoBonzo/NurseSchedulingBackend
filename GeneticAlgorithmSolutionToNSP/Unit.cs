@@ -71,26 +71,26 @@ namespace GeneticAlgorithmSolutionToNSP
                 int randomNurse = randNurse();
                 int randomShift = randShift();
                 //wiem ze moze sie ten sam zmutowac kilka razy, ale w czym to przeszkadza?
+                bool isNightShift = NurseCalculations.isNightShift(randomShift);
+                int numberOfshifts = NurseCalculations.GetNumberOfShifts(this, randomShift);
 
                 if (NurseCalculations.IsWeekend(randomShift) )
                 {
-                    if (!NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 2)
+                    if (!isNightShift && numberOfshifts > 2)
                         continue;
-                    if (NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 1)
+                    if (isNightShift && numberOfshifts > 1)
                         continue;
                 }
                 else
                 {
-                    if (!NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 3)
+                    if (!isNightShift && numberOfshifts > 3)
                         continue;
-                    if (NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 1)
+                    if (isNightShift && numberOfshifts > 1)
                         continue;
                 }
 
                 this.array[randomNurse, randomShift] = !this.array[randomNurse, randomShift];
                 //todo wurzucic jedynki z sensem 
-                
-                
 
                 numberToMutate--;
             }
