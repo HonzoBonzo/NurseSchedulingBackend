@@ -16,6 +16,7 @@ namespace GeneticAlgorithmSolutionToNSP
         public static int SHIFTS_TO_SCHEDULE_NUMBER { get { return 140; } }
         public static int LAST_IMPORTED_SHIFT_INDEX { get { return 111; } }
         public static int FIRST_SHIFT_TO_SCHEDULE_INDEX { get { return 112; } }
+        public static int LAST_SHIFT_TO_SCHEDULE_INDEX { get { return 251; } }
 
         public static int WEEKS_NUMBER { get { return 9; }}
         public static int WEEKS_TO_SCHEDULE_NUMBER { get { return 5; }}
@@ -40,5 +41,9 @@ namespace GeneticAlgorithmSolutionToNSP
         public static int UNIT_MUTATION_NUMBER { get { return (int)(UNIT_MUTATION_RATIO * SHIFTS_TO_SCHEDULE_NUMBER); } }
         public static int POPULATION_MUTATION_NUMBER { get { return (int)(POPULATION_MUTATION_RATIO * SHIFTS_TO_SCHEDULE_NUMBER); } }
 
+        public static int FIRST_HALF_SHIFTS_TO_SCHEDULE_FIRST_INDEX { get { return FIRST_SHIFT_TO_SCHEDULE_INDEX; } }
+        public static int FIRST_HALF_SHIFTS_TO_SCHEDULE_LAST_INDEX { get { return FIRST_SHIFT_TO_SCHEDULE_INDEX + POPULATION_SIZE; } }
+        public static int SECOND_HALF_SHIFTS_TO_SCHEDULE_FIRST_INDEX { get { return LAST_SHIFT_TO_SCHEDULE_INDEX - POPULATION_SIZE; } }
+        public static int SECOND_HALF_SHIFTS_TO_SCHEDULE_LAST_INDEX { get { return LAST_SHIFT_TO_SCHEDULE_INDEX; } }
     }
 }

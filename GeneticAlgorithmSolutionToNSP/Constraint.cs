@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class Constraint
+    public class Constraint
     {
         public int failed;
 

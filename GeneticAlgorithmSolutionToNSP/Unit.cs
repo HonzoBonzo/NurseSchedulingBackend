@@ -6,18 +6,19 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class Unit
+    public class Unit //osobnik
     {
         bool[,] array = new bool[Constants.NURSE_NUMBER, Constants.SHIFTS_NUMBER];
         int failedHardConstraints;
         int failedSoftConstraints;
 
 
-        public Unit()
-        {
-            importWeeks();
-            makeChromosome();
-            rateStrength();
+        public Unit() { }
+
+        public void Init() {
+            this.importWeeks();
+            this.makeChromosome();
+            this.rateStrength();
         }
 
         void importWeeks()
@@ -28,7 +29,7 @@ namespace GeneticAlgorithmSolutionToNSP
                 for (int j = 0; j <= Constants.LAST_IMPORTED_SHIFT_INDEX; j++)
                 {
                     Random randomGen = new Random();
-                    bool val = randomGen.Next(2) == 1 ? true : false;
+                    bool val = randomGen.Next(16) == 0 ? true : false;
                     this.array[i, j] = val;
                 }
             }
@@ -82,14 +83,45 @@ namespace GeneticAlgorithmSolutionToNSP
                 int randomNurse = randNurse();
                 int randomShift = randShift();
                 //wiem ze moze sie ten sam zmutowac kilka razy, ale w czym to przeszkadza?
+
+                if (Helper.IsWeekend(randomShift) )
+                {
+                    if (!Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 2)
+                        continue;
+                    if (Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 1)
+                        continue;
+                }
+                else
+                {
+                    if (!Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 3)
+                        continue;
+                    if (Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 1)
+                        continue;
+                }
+
                 this.array[randomNurse, randomShift] = !this.array[randomNurse, randomShift];
+                //todo wurzucic jedynki z sensem 
+                
+                
+
                 numberToMutate--;
             }
             return this;
         }
 
+        public void SetShift(int nurseIndex, int shiftIndex)
+        {
+            this.array[nurseIndex, shiftIndex] = true; 
+        }
+
+        public void CopyShift(int nurseIndex, int shiftIndex, Unit src)
+        {
+            this.array[nurseIndex, shiftIndex] = src.Array[nurseIndex, shiftIndex];
+        }
+
         public int FailedHardConstraints { get { return this.failedHardConstraints; } }
         public int FailedSoftConstraints { get { return this.failedSoftConstraints; } }
+        public bool[,] Array { get { return this.array; } }
     }
 
 

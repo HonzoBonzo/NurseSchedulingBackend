@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class Population : Unit
+    public class Population 
     {
         Unit[] arr;
         Selection selectionMethod;
@@ -32,15 +32,24 @@ namespace GeneticAlgorithmSolutionToNSP
         public void SimulateAlgorithm() {
             for (int i = 0; i < Constants.EPOCHS_NUMBER; i++)
             {
+                Console.WriteLine("Generacja nr: {0}", i+1);
                 selectionMethod.MakeSelection(this.arr);
                 crossoverMethod.MakeCrossover(this.arr);
-                mutationMethod.makeMutation(this.arr);
+                mutationMethod.MakeMutation(this.arr);
             }
         }
 
         private Unit[] initPopulation()
         {
-            return new Unit[Constants.POPULATION_SIZE];
+            Unit[] arr = new Unit[Constants.POPULATION_SIZE];
+
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = new Unit();
+                arr[i].Init();
+            }
+
+            return arr;
         }
 
         public Unit[] Array { get { return this.arr; } }

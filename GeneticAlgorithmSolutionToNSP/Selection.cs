@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class Selection
+    public class Selection
     {
         public Selection() { }
 
         internal void MakeSelection(Unit[] popArr)
         {
             sortPopulation(popArr);
-            dismissBadUnits(popArr);
+            selectGoodUnits(popArr);
         }
 
-        private void dismissBadUnits(Unit[] popArr)
+        private void selectGoodUnits(Unit[] popArr)
         {
             popArr = subArray(popArr, 0, Constants.POPULATION_SIZE);
         }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class Mutation
+    public class Mutation
     {
         public Mutation() { }
 
-        internal void makeMutation(Unit[] unitArr)
+        internal void MakeMutation(Unit[] unitArr)
         {
             for (int i = 0; i < Constants.POPULATION_MUTATION_NUMBER; i++)
             {

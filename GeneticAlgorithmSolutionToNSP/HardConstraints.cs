@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmSolutionToNSP
 {
-    class HardConstraints : Constraint
+    public class HardConstraints : Constraint
     {
         private bool[,] arr;
 
