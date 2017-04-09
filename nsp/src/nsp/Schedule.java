@@ -84,6 +84,8 @@ public class Schedule {
 	}
 	
 	public void setSchedule(int nurseId, int shift){
+		System.out.println("\n+++ Nurse:" + nurseId + " shift: " + shift);
+		
 		Nurse nurse = NurseManager.getNurse(nurseId);
 		boolean isWeekend = NurseCalculations.checkIfItIsTheWeekend(shift);
 		boolean isNightShift = NurseCalculations.isNightShift(shift);
@@ -103,9 +105,10 @@ public class Schedule {
 		}
 		
 		if(isNightShift){
-			nurse.consecutiveNightShifts++;
+			nurse.consecutiveNightShifts++;		 
 			nurse.nightShiftsThisPeriod++;
 			nurse.nightShiftThisWeekend++;
+			System.out.println("Inkrementuje dla nursa: " + nurseId + " shift: " +shift + " nightSHiftsThisPeriod: " +nurse.nightShiftsThisPeriod );
 		}
 		
 		nurse.workedYesterday = true;
@@ -194,6 +197,7 @@ public class Schedule {
 					else{
 						if(nurseId >= 15){
 							nurseId = 0;
+							System.out.println("Robie backup1 Nurse:" +nurseId + " shift: " + shift);
 							NurseManager.allNurses = NurseManager.allNursesBackup;
 							NurseManager.allNursesBackup = null;
 						}
@@ -207,6 +211,7 @@ public class Schedule {
 						failedAttemptsToSetNurse++;
 						nurseId = 0;
 						//tutaj sie w koncu wywala
+						System.out.println("Robie backup2 Nurse:" +nurseId + " shift: " + shift);
 						NurseManager.allNurses = NurseManager.allNursesBackup;
 						NurseManager.allNursesBackup = null;
 					}

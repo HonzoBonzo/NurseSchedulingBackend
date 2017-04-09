@@ -43,35 +43,67 @@ public class Constraints {
 		this.schedule = schedule;
 		this.nurse = NurseManager.getNurse(nurseId);
 
-		try{
-			if (nurse.totalWorkedTime > nurse.hoursPerWeek * 4)
-				return false;
-		}
-		
-		catch(Exception e){
-			System.out.println("ewfwef");
+		if (nurse.totalWorkedTime > nurse.hoursPerWeek * 4) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: godziny");
+			return false;
 		}
 
+		if (isNurseAlreadyWorkingToday()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h1");
+			return false;
+		}
 
-		boolean h1 = !isNurseAlreadyWorkingToday();
-		boolean h2 = isNumberOfNightShiftsLessOrEqualThanThree();
-		boolean h3 = isNumberOfFreeWeekendsMoreOrEqualThenTwo();
-		boolean h4 = enoughRestAfterConsecutiveNightShifts();
-		boolean h5 = enoughRestIn24Hours();
-		boolean h6 = enoughRestAfterNightShift();
-		boolean h7 = consecutiveNightShiftsConstraint();
-		boolean h8 = consecutiveWorkdaysConstraint();
+		if (!isNumberOfNightShiftsLessOrEqualThanThree()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h2");
+			return false;
+		}
+		if (!isNumberOfFreeWeekendsMoreOrEqualThenTwo()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h3");
+			return false;
+		}
+		if (!enoughRestAfterConsecutiveNightShifts()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h4");
+			return false;
+		}
+		if (!enoughRestIn24Hours()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h5");
+			return false;
+		}
+		if (!enoughRestAfterNightShift()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h6");
+			return false;
+		}
+		if (!consecutiveNightShiftsConstraint()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h7");
+			return false;
+		}
+		if (!consecutiveWorkdaysConstraint()) {
+			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h8");
+			return false;
+		}
 
-		if (h1 && h2 && h3 && h4 && h5 && h6 && h7 && h8)
-			return true;
+		/*
+		 * boolean h1 = !isNurseAlreadyWorkingToday(); boolean h2 =
+		 * isNumberOfNightShiftsLessOrEqualThanThree(); boolean h3 =
+		 * isNumberOfFreeWeekendsMoreOrEqualThenTwo(); boolean h4 =
+		 * enoughRestAfterConsecutiveNightShifts(); boolean h5 =
+		 * enoughRestIn24Hours(); boolean h6 = enoughRestAfterNightShift();
+		 * boolean h7 = consecutiveNightShiftsConstraint(); boolean h8 =
+		 * consecutiveWorkdaysConstraint();
+		 * 
+		 * if (h1 && h2 && h3 && h4 && h5 && h6 && h7 && h8) return true;
+		 */
 
-		return false;
+		return true;
 	}
 
 	/*
 	 * For each day a nurse may start only one shift
 	 */
 	public boolean isNurseAlreadyWorkingToday() {
+
+		if (nurseId == 9 && shift == 19)
+			System.out.println("");
 		int[] nurseScheduleForTheDay = getNurseDaySchedule(nurseId, shift);
 		for (int i = 0; i < 4; i++) {
 			if (nurseScheduleForTheDay[i] == 1)
@@ -86,10 +118,15 @@ public class Constraints {
 	 * weeks.
 	 */
 	public boolean isNumberOfNightShiftsLessOrEqualThanThree() {
-		if (nurse.nightShiftsThisPeriod < 3)
-			return true;
+		if (NurseCalculations.isNightShift(shift)) {
+			if (nurse.nightShiftsThisPeriod < 3)
+				return true;
 
-		return false;
+			return false;
+		}
+
+		return true;
+
 	}
 
 	/*
@@ -97,12 +134,26 @@ public class Constraints {
 	 * weekend off duty lasts 60 hours including Saturday 00:00 to Monday 04:00.
 	 */
 	public boolean isNumberOfFreeWeekendsMoreOrEqualThenTwo() {
-		int freeWeekends = 4 - nurse.workingWeekends;
+		
+		int previousShift = getPreviousShift();
+		if(NurseCalculations.checkIfItIsTheWeekend(previousShift)){
+			if(shift - previousShift < 8){
+				//then it was the same weekend
+				return true;
+			}
+		}
+		
+		if(NurseCalculations.checkIfItIsTheWeekend(shift)){
+			int freeWeekends = 4 - nurse.workingWeekends;
 
-		if (freeWeekends >= 2)
-			return true;
+			if (freeWeekends >= 2)
+				return true;
 
-		return false;
+			return false;
+		}
+		
+		return true;
+
 	}
 
 	/*
@@ -116,19 +167,19 @@ public class Constraints {
 			int previousShift = getPreviousShift();
 			int daysBetween = NurseCalculations.convertShiftToDay(shift)
 					- NurseCalculations.convertShiftToDay(previousShift);
-			
+
 			if (previousShift == -1)
 				return true;
 
 			if (daysBetween > 2)
 				return true;
-			else{
+			else {
 				int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
 				if (rest >= 42)
 					return true;
 				else
 					return false;
-				
+
 			}
 		}
 
@@ -167,46 +218,45 @@ public class Constraints {
 	 */
 	public boolean enoughRestAfterNightShift() {
 		int previousShift = getPreviousShift();
-		
+
 		// its going to be the first shift - no need to rest
 		if (previousShift == -1)
 			return true;
-		
-		if(NurseCalculations.isNightShift(previousShift)){
+
+		if (NurseCalculations.isNightShift(previousShift)) {
 			int restTime = NurseCalculations.timeBetweenShifts(previousShift, shift);
-			if(restTime >= 14){
+			if (restTime >= 14) {
 				return true;
-			}
-			else{
-				if(nurse.exceptionForRestAfterNightShift == false){
+			} else {
+				if (nurse.exceptionForRestAfterNightShift == false) {
 					nurse.exceptionForRestAfterNightShift = true;
 					return true;
 				}
 				return false;
 			}
 		}
-		
+
 		else
 			return true;
 	}
-	
+
 	/*
-	 * The	number	of	consecutive	night	shifts	is	at	most	3.	
+	 * The number of consecutive night shifts is at most 3.
 	 */
 
-	public boolean consecutiveNightShiftsConstraint(){
-		if(nurse.consecutiveNightShifts < 3)
+	public boolean consecutiveNightShiftsConstraint() {
+		if (nurse.consecutiveNightShifts < 3)
 			return true;
 		else
 			return false;
 	}
-	
+
 	/*
-	 * The	number	of	consecutive	shifts	(workdays)	is	at	most	6.	
+	 * The number of consecutive shifts (workdays) is at most 6.
 	 */
 
-	public boolean consecutiveWorkdaysConstraint(){
-		if(nurse.consecutiveShifts < 6)
+	public boolean consecutiveWorkdaysConstraint() {
+		if (nurse.consecutiveShifts < 6)
 			return true;
 		else
 			return false;

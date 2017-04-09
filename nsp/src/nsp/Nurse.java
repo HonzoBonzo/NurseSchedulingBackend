@@ -4,6 +4,7 @@ public class Nurse {
 
 	 int id;
 	 int hoursPerWeek;
+	 
 	 int nightShiftThisWeekend;
 	 public int nightShiftsThisPeriod;
 	 int consecutiveNightShifts;
@@ -23,7 +24,9 @@ public class Nurse {
 	
 	public Nurse copyNurse(){
 		Nurse copy = new Nurse(id, hoursPerWeek);
+		
 		copy.nightShiftThisWeekend = nightShiftThisWeekend;
+		copy.nightShiftsThisPeriod = nightShiftsThisPeriod;
 		copy.consecutiveNightShifts = consecutiveNightShifts;
 		copy.workedYesterday = workedYesterday;
 		copy.consecutiveShifts = consecutiveShifts;
@@ -31,6 +34,7 @@ public class Nurse {
 		copy.workingWeekends = workingWeekends;
 		copy.exceptionForRestAfterNightShift = exceptionForRestAfterNightShift;
 		copy.startedShiftToday = startedShiftToday;
+
 		
 		return copy;
 	}

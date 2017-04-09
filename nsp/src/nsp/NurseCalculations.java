@@ -3,6 +3,7 @@ package nsp;
 public class NurseCalculations {
 
 	
+	
 	public static int getRequirementsForTheShift(int shift){
 		boolean isWeekend = checkIfItIsTheWeekend(shift);
 		

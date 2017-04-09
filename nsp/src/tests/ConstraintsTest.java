@@ -39,6 +39,24 @@ public class ConstraintsTest {
 		// 60 is the first shift in next day
 		assertEquals(false, constraint.isNurseAlreadyWorkingToday());
 	}
+	
+	@Test
+	public void onlyOneShiftADayPerNurse2() {
+		schedule.setSchedule(9, 15);
+		constraint.checkSchedule(9, 16, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNurseAlreadyWorkingToday());
+		constraint.checkSchedule(9, 17, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNurseAlreadyWorkingToday());
+		constraint.checkSchedule(9, 18, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNurseAlreadyWorkingToday());
+		constraint.checkSchedule(9, 19, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNurseAlreadyWorkingToday());
+
+		
+	}
+	
+	
+	
 
 	/*
 	 * The maximum number of night shifts is 3 per period of 5 consecutive
@@ -59,27 +77,50 @@ public class ConstraintsTest {
 		// 4th would not be ok
 		assertEquals(false, constraint.isNumberOfNightShiftsLessOrEqualThanThree());
 	}
+	
+	@Test
+	public void maxNumberOfNightShifts2() {
+
+		// schedule 2 night shifts
+		schedule.setSchedule(5, 31);
+		schedule.setSchedule(5, 39);
+		constraint.checkSchedule(5, 43, schedule.getAllSchedule());
+		// 3rd would be ok
+		assertEquals(true, constraint.isNumberOfNightShiftsLessOrEqualThanThree());
+
+		//schedule 3rd nigh shift
+		schedule.setSchedule(5, 43);
+		
+		//if its not a night shift she can take it
+		constraint.checkSchedule(5, 48, schedule.getAllSchedule());
+		assertEquals(true, constraint.isNumberOfNightShiftsLessOrEqualThanThree());
+	}
 
 	/*
 	 * A nurse must receive at least 2 weekends off duty per 5 week period. A
 	 * weekend off duty lasts 60 hours including Saturday 00:00 to Monday 04:00.
 	 */
 	@Test
-	@Ignore
 	public void weekendOfDuty() {
 
+		//w1
 		schedule.setSchedule(5, 20);
+		//w2
 		schedule.setSchedule(5, 48);
+		//w3
 		schedule.setSchedule(5, 76);
 		// cant heave 4th working weekend
-		constraint.checkSchedule(5, 105, schedule.getAllSchedule());
+		constraint.checkSchedule(5, 104, schedule.getAllSchedule());
 		assertEquals(false, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
 
 		Nurse nurse = NurseManager.getNurse(1);
+		//w1
 		schedule.setSchedule(1, 20);
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
+		//w1
 		schedule.setSchedule(1, 24);
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
+		//w2
 		schedule.setSchedule(1, 76);
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
 
@@ -87,11 +128,21 @@ public class ConstraintsTest {
 		constraint.checkSchedule(1, 105, schedule.getAllSchedule());
 		assertEquals(true, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
 
+		//w3
 		schedule.setSchedule(1, 105);
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
+		//w3
 		constraint.checkSchedule(1, 108, schedule.getAllSchedule());
 		assertEquals(true, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
-
+		
+		
+		constraint.checkSchedule(1, 132, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
+		
+		
+		//not a weekend shift - should be irrelevant 
+		constraint.checkSchedule(1, 64, schedule.getAllSchedule());
+		assertEquals(true, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
 	}
 
 	/*
