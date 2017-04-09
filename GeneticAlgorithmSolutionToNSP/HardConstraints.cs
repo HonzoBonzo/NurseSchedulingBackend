@@ -81,6 +81,8 @@ namespace GeneticAlgorithmSolutionToNSP
         /* For each day a nurse may start only one shift. */	
         private void constraint2()
         {
+
+
             this.failed++;
         }
 

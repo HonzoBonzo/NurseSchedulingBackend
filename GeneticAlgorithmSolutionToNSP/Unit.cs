@@ -10,14 +10,14 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         bool[,] array = new bool[Constants.NURSE_NUMBER, Constants.SHIFTS_NUMBER];
         int failedHardConstraints;
-        int failedSoftConstraints;
+        int failedSoftConstraintsWeight;
 
 
         public Unit() { }
 
         public void Init() {
-            this.importWeeks();
-            this.makeChromosome();
+            this.importWeeks(); //importuje poprzednie 4 tygodnie
+            this.makeChromosome(); //
             this.rateStrength();
         }
 
@@ -28,9 +28,7 @@ namespace GeneticAlgorithmSolutionToNSP
             {
                 for (int j = 0; j <= Constants.LAST_IMPORTED_SHIFT_INDEX; j++)
                 {
-                    Random randomGen = new Random();
-                    bool val = randomGen.Next(16) == 0 ? true : false;
-                    this.array[i, j] = val;
+                    this.array[i, j] = randBool(); //na razie wypelniamy czymkolwiek, bo nie mamy poprzedniej
                 }
             }
         }
@@ -51,7 +49,7 @@ namespace GeneticAlgorithmSolutionToNSP
             this.failedHardConstraints = hard.Failed;
 
             SoftConstraints soft = new SoftConstraints(this.array);
-            this.failedSoftConstraints = soft.Failed;
+            this.failedSoftConstraintsWeight = soft.Failed;
         }
 
         private bool randBool()
@@ -120,7 +118,7 @@ namespace GeneticAlgorithmSolutionToNSP
         }
 
         public int FailedHardConstraints { get { return this.failedHardConstraints; } }
-        public int FailedSoftConstraints { get { return this.failedSoftConstraints; } }
+        public int FailedSoftConstraints { get { return this.failedSoftConstraintsWeight; } }
         public bool[,] Array { get { return this.array; } }
     }
 
