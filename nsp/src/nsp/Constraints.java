@@ -43,8 +43,15 @@ public class Constraints {
 		this.schedule = schedule;
 		this.nurse = NurseManager.getNurse(nurseId);
 
-		if (nurse.totalWorkedTime > nurse.hoursPerWeek * 4)
-			return false;
+		try{
+			if (nurse.totalWorkedTime > nurse.hoursPerWeek * 4)
+				return false;
+		}
+		
+		catch(Exception e){
+			System.out.println("ewfwef");
+		}
+
 
 		boolean h1 = !isNurseAlreadyWorkingToday();
 		boolean h2 = isNumberOfNightShiftsLessOrEqualThanThree();

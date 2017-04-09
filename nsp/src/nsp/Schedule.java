@@ -59,12 +59,23 @@ public class Schedule {
 		return nurseDayShedule;
 	}
 	
+	public int[] getNurseDayScheduleFromDay(int nurseId, int day) {
+		int[] nurseDayShedule = new int[4];
+		int firstShiftThatDay = NurseCalculations.getFirstShiftFromTheDay(day);
+
+		nurseDayShedule[0] = schedule[nurseId][firstShiftThatDay];
+		nurseDayShedule[1] = schedule[nurseId][firstShiftThatDay + 1];
+		nurseDayShedule[2] = schedule[nurseId][firstShiftThatDay + 2];
+		nurseDayShedule[3] = schedule[nurseId][firstShiftThatDay + 3];
+
+		return nurseDayShedule;
+	}
 	
 	public boolean checkIfNurseWorkedNightShift(int[] nurseDaySchedule){
 		return nurseDaySchedule[3] == 1;
 	}
 	
-	public boolean checkIfNurseWorkedYesterday(int[] nurseDaySchedule){
+	public boolean checkIfNurseWorked(int[] nurseDaySchedule){
 		for(int i=0; i<4; i++)
 			if(nurseDaySchedule[i] == 1)
 				return true;
@@ -111,18 +122,25 @@ public class Schedule {
 	
 	public void clearNurseDataDaily(int day){
 		Nurse nurse;
+		if(day==0)
+			return;//nothing to check from yesterday
 		for(int i=0; i<16; i++){
 			nurse = NurseManager.getNurse(i);
-			int []nurseDay = getNurseDaySchedule(i, day -1);
+			//TODO czy dobrze?
+			
+			int []nurseDay = getNurseDayScheduleFromDay(i, day -1);
 			
 			//jeœli nie pracowa³a wczoraj
 			if(!checkIfNurseWorkedNightShift(nurseDay))
 				nurse.consecutiveNightShifts = 0;
 			
-			if(checkIfNurseWorkedYesterday(nurseDay))
+			if(checkIfNurseWorked(nurseDay))
 				nurse.workedYesterday = true;
-			else
+			else{
 				nurse.workedYesterday = false;
+				nurse.consecutiveShifts = 0;
+			}
+
 				
 		}
 	}
@@ -141,9 +159,17 @@ public class Schedule {
 			if(shift % 28 == 0)
 				clearNurseDataWeekly();
 			
+			if(shift==28){
+				System.out.println("wdwd");
+			}
+			
 			//is new day?
 			if(shift % 4 == 0)
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
+
+			if(shift==29){
+				System.out.println("wdwd");
+			}
 			
 			if(shift==11){
 				System.out.println("wdwd");
@@ -164,6 +190,14 @@ public class Schedule {
 						backupNurses();
 						break;						
 					}
+					
+					else{
+						if(nurseId >= 15){
+							nurseId = 0;
+							NurseManager.allNurses = NurseManager.allNursesBackup;
+							NurseManager.allNursesBackup = null;
+						}
+					}
 				}
 
 				else{
@@ -172,6 +206,7 @@ public class Schedule {
 						
 						failedAttemptsToSetNurse++;
 						nurseId = 0;
+						//tutaj sie w koncu wywala
 						NurseManager.allNurses = NurseManager.allNursesBackup;
 						NurseManager.allNursesBackup = null;
 					}

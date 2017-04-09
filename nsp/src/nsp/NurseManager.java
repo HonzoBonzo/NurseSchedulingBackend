@@ -16,7 +16,8 @@ public class NurseManager {
 	}
 	
 	public static Nurse getNurse(int index){
-		return allNurses[index];
+			return allNurses[index];
+
 	}
 	
 	public static void backupNurses(){

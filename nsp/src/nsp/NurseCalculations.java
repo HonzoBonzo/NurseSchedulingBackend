@@ -27,8 +27,8 @@ public class NurseCalculations {
 	
 	public static boolean checkIfItIsTheWeekend(int shift) {
 		int weekNr = shift / 28;
-		int value = shift - (28 * weekNr);
-		if (value >= 20 && value <= 28)
+		int value = shift % 28;
+		if (value >= 20 && value < 28)
 			return true;
 		else
 			return false;

@@ -21,10 +21,20 @@ public class ExportScheduleToHtml {
 		for(int i=0; i<16; i++){
 			writer.println("<tr><th>"+ i +".</th>" );
 			for(int j=0; j<35*4; j++){
-				if(j%4 == 3)
-					writer.println("<th bgcolor=\"#e5e1e0\">" + schedule[i][j] + "</th>");	
-				else
-					writer.println("<th>" + schedule[i][j] + "</th>");	
+				if(j%4 == 3){
+					if (schedule[i][j] == 1)
+						writer.println("<th bgcolor=\"#FF0000\">" + schedule[i][j] + "</th>");
+					else
+						writer.println("<th bgcolor=\"#e5e1e0\">" + schedule[i][j] + "</th>");	
+				}
+					
+				else{
+					if (schedule[i][j] == 1)
+						writer.println("<th bgcolor=\"#FF0000\">" + schedule[i][j] + "</th>");
+					else
+						writer.println("<th>" + schedule[i][j] + "</th>");	
+				}
+					
 				
 			
 			}
