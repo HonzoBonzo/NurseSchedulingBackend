@@ -19,7 +19,7 @@ namespace GeneticAlgorithmSolutionToNSP
         {
             int populationLen = units.Length;
             int numberOfPairs = populationLen / 2;
-            Array.Resize(ref units, populationLen + numberOfPairs);
+            units = Array.Resize(ref units, populationLen + numberOfPairs);
             
 
             for (int i = 0; i < numberOfPairs; i++)
