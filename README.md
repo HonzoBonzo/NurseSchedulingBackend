@@ -1,146 +1,58 @@
-# Krotki	opis	problemu:	
-Problem	dotyczy	 optymalizacji	harmonogramu	pracy	personelu	medycznego	w	szpitalu.	
-Konkretny	przyklad	jest	wziety	z	literatury	technicznej	i dotyczy	szczegolnych	wymogow	
-w	 szpitalach	 Holenderskich.	 Nalezy	 zoptymalizowac	 harmonogram	 pracy	 dla	 16	
-pielegniarek,	zatrudnionych	na	roznych	kontraktach	godzinowych.	Harmonogram	ma	byc	
-opracowany	 na	 35	 dni	 (5	 tygodni)	 i	 ma	 zapewnic	 obsade	 personelu	 na	 wszystkich	
-zmianach	 zgodnie	 z	 wymaganiami	 klinicznymi	 oraz	 zgodnie	 z	 wymogami	 ustaw	 o	
-godzinach	 pracy.	 Te	 podstawowe	 wymagania	 musza	 zawsze	 byc	 spelnione.	 Dodatkowe	
-wymagania	powinny	bys	spelnione	w	jak	najwyzszyn	stopniu	ale	nie	sa	one	konieczne	do	
-tego	 aby	 harmonogram	 mogl	 byc	 zaakceptowany.	 Jakosc	 harmonogramu	 jest	 okreslona	
-przez	stopien	spelnienia	tych	dodatkowych	warunkow.
+# Domain transformation
+podejście do rozwiązywania złożonych problemów, które obejmuje:
+  -rozsądne uproszczenie oryginalnego problemu
+  -rozwiązanie uproszczenia
+  -transformacja rozwiązania 
+  
+# Opinia o algorytmie z publikacji prof. Bargieli
+``` 
+" The greedy algorithm outperforms in most cases when tested with the different demands and number of nurses.
+The results facilitated the development of a cost–benefit analysis across different levels of staffing. "
 
-
-
-
-
-
-# Analiza algorytmu genetycznego
+" Taken as a whole, the proposed approach has a number of distinct advantages. The greedy algorithm is easy
+to implement, which ensures a good solution is obtained in real time. "
 ```
-Dane: tablica 16 x [(28 + 35 = 63)x4]
-czyli: p x z, gdzie p=16, z=252
-Dla 9 tygodni mamy tablice z 4032 polami.
 
-p - pielegniarka,
-z - zmiana
-x - true
-o - false
-? - to ma ustalic algorytm: czy true? czy false?
+# W naszym przypadku 3 główne etapy to:
+ - konwersja problemu z edlnR na problem DNR
+ - rozwiązanie dla problemu DNR
+ - konwersja rozwiązanie DNR na rozwiązanie edlNR
+gdzie e e (early shift), d (day shift), l (late shift), N (night shift)
+and R (rest day) while D (połączenie zmian ypu early, day i late)
 
-Pola na osi OZ 0 - 111 są narzucone z poprzedniego grafiku
-Pola na osi OZ 112 - 251 musi wyliczyć algorytm
+# Co potrzeba przed przystąpieniem do algorytmu zachłannego?
+Do rozwiązania problemu tym algorytmem należy wygenerować jednotygodniowe wzorce spełniające wymagania twarde (hard constraints) i spełniające lub łamiące określoną liczbę wymagań miękkich (soft constraints).
 
-o - tablica
-o = p x z
+W projektowaniu sekewncji zmian najpierw bierzemy pod uwagę zmiany, które są najważniejsze lub te najtrudniejsze do spełnienia. W naszym przypadku są to zmiany nocne. Optymalnym rozwiązaniem są trzy wzorce tygodniowych zmian nocnych:
 
-  p
-  /\
-15|	x 	o 	x 	o 	...	o 	x 	?	? 	... ? 	?
-..|	.. 	.. 	.. 	..	...	.. 	.. 	..	.. 	... ..	..
-..|	.. 	.. 	.. 	..	...	.. 	.. 	..	.. 	... .. 	..
- 0|	x 	o 	o 	x 	...	o 	x 	?	?	... ? 	?
-  |_________________________________________________\ z
- 	0	1	2	3	...	110	111	112	113	...	250	251	/
+|          | M | T | W | T | F | S | S |
+|----------|---|---|---|---|---|---|---|
+|Pattern A | N | N | - | - | - | - | - |
+|Pattern B | - | - | N | N | - | - | - |
+|Pattern C | - | - | - | - | N | N | N |
 
-switch(z % 4){
-	case 0: "zmiana Day(D): 8:00 - 17:00"
-	case 1: "zmiana Early(E): 7:00 - 17:00"
-	case 2: "zmiana Late(L): 14:00 - 23:00"
-	case 3: "zmiana Night(N): 23:00 - 7:00"
-}
-```
-## Osobnik?
-To będzie jedna taka tabela:
-typedef bool osobnik[NURSE_NUMBER][SHIFTS_NUMBER];
+Dlaczego akurat tak? Ze względu na dwa pierwsze (najbardziej kosztowne, bo warte 1000 każde ograniczenia miękkie)
+- Od piątku 22:00 do poniedziałku 0:00 pielęgniarka powinna albo nie mieć żadnej zmiany, albo mieć przynajmniej 2
+- Dla pielęgniarek pracujących od 30-48 h tygodniowo (czyli wszystkich?) długość zmian nocnych powinna wynosić 2-3. 
 
-## Populacja?
-osobnik populacja[POPULATION_SIZE];
+W publikacji pisze, że tylko te 3 wzorce spełniają ograniczenia twarde, chociaż nie do końca jest to dla mnie jasne. 
+![alt tag](https://github.com/HonzoBonzo/NurseSchedulingBackend/blob/mboryczko/paterns.PNG)
 
-## Chromosom?
-ja to widzę jako komórkę w naszej tabeli: false(0), true(1)
+Gdy mamy już wzorce użyjemy ich do wygenerowania harmonogramu dla jednego tygodnia w domenie DNR. Grupujemy wzorce do 3 kategorii wg kosztu: 0, 5 i 10. Wyszczególniamy wszystkie wzorce nocne (które mogą, ale nie muszą mieć zmian dziennych) i zmiany dzienne (które zawierają tylko zmiany dzienne) oraz wszystkie 
 
 
-## PSEUDOKOD
-```
-doneTablePart = import from "stary schedule"; // pobieramy skads 4 ostatnie tygodnie
+# W skrócie:
+W tygodniu pierwszym używamy wzorców o koszcie 0
+1. do każdej pielęgniarki przydzielamy odpowiedni wzorzec (czyli od razu cały plan pierwszego tygodnia)
+  zgodnie z zasadami Algorytmu Zachłannego(staramy się najpierw, jeśli to możliwe, przydzielić najlepiej dopasowany wzorzec nocny -   jeśli jest jeszcze dostępny lub możliwy do użycia - jeśli nie to najlepiej dopasowany wzorzec dzienny)  
+2. Po wstępnym przydzieleniu jeśli jest za dużo zmian nocnych w harmonogramie - zastępujemy je dniami wolnymi
+3. Dla każdego dnia tygodnia sprawdzamy czy spełnione są warunki 
+  -liczby zmian dziennych -> jeśli nie to zamieniamy pewne zmiany na dni wolne 
+  -liczby zmian nocnych -> jeśli nie to zamieniamy pewne zmiany na dni wolne 
+4. poprawiamy przydzielone wzorce - tak, że jeśli wyszło więcej zmian niż jest zapotrzebowanie to zastępujemy je dniami wolnymi
+5. poprawiamy przydzielone wzorce - tak, że jeśli wyszło mniej zmian niż jest zapotrzebowanie to zastępujemy je
 
-#define POPULATION_SIZE 100; //liczba takich tabel jak powyżej
-#define NURSE_NUMBER 16; 
-#define SHIFTS_NUMBER 252;
-#define EPOCH_NUMBER 100; //przykladowa ilosc generacji
-#define WEEKS_NUMBER 9;
-#define WEEKS_TO_SCHEDULE 5; //liczba tygodni do ustalenia
-#define DAY_SHIFT 0;
-#define EARLY_SHIFT 1;
-#define LATE_SHIFT 2;
-#define NIGHT_SHIFT 3;
+6. To samo wykonujemy dla następnych tygodni uwzględniając ograniczenia z poprzednich tygodni i używając wzorców o koszcie
+niekoniecznie zerowym
+7. konwertujemy problem z domeny DNR na domenę edlNR
 
-int hard_constraint_failed_number = 0; //waga za kazde +1
-int soft_constraint_failed_number = 0; //wagi jak w zadaniu
-
-//funkcje
-void setDonePartOfTable(osobnik *os, doneTablePart) {};
-bool losuj() { return bool.rand(); }
-int checkHardConstraints(osobnik os) { return liczba; }
-int checkSoftConstraints(osobnik os) { return liczba; }
-void sortPopulation(populacja *pop, scores[][]) {}
-osobnik crossUnits() { return crossedUnit; }
-population mutatePopulation(populacja *pop, ratio) {}
-```
-## ETAPY ALGORYTMU
-### 1. Losowanie populacji
-```
-foreach(osobnik in populacja) {
-	setDonePartOfTable(&osobnik, doneTablePart);
-	for (int i=0; i<NURSE_NUMBER; i++) {
-		for (int j=0; j<SHIFTS_NUMBER; j++)
-			osobnik[i][j] = losuj();
-	}
-}
-```
-### 2. Ocena osobników
-```
-if(isDefined(crossedPopulation)) populacja = crossedPopulation;
-
-int scores[populacja.size][2] = {};
-int n=0; //indeks w tabeli popoulacja
-
-foreach(osobnik in populacja) {
-	scores[n][0] = checkHardConstraints(osobnik);
-	scores[n][1] = checkSoftConstraints(osobnik);
-	++n;
-}
-
-sortPopulation(&populacja, scores);
-```
-### 3. Selekcja
-```
-osobnik newPopulation[POPULATION_SIZE];
-for (int i; i<population.size/2; i++) {
-	newPopulation.push(population[i]); //nowa populacja bedzie zawierac tylko najlepsze osobniki
-}
-```
-### 4. Krzyżowanie
-```
-osobnik crossedPopulation[POPULATION_SIZE*2]; //nowa tablica ze skrosowanymi i starymi
-
-
-for (int i=0; i<POPULATION_SIZE; i++) {
-	//wez polowe z pierwszego i polowe ostatniego i zlacz;
-	//albo wez parzyste zmiany z pierwszego i zlacz z nieparzystymi ostatniego osobnika
-	// tu są różne kombinacje można kilka przemyśleć i przetestować
-	
-	osobnik crossedUnit = crossUnits(newPopulation[i], newPopulation(POPULATION_SIZE-1));
-	crossedPopulation.push(crossedUnit); // dodaj nowego
-	crossedPopulation.push(newPopulation[i]); // i starego tez, bo dobry byl w miare xD
-}
-```
-### 5. Mutacja
-```
-int ratio = POPULATION_SIZE/4; //np mutujemy tylko 1/8 naszych osobników
-mutatePopulation(&crossedPopulation, ratio);
-```
-### 6. Powrót do punktu 2
-
-
-## KONIEC ANALIZY
