@@ -34,19 +34,19 @@ namespace GeneticAlgorithmSolutionToNSP
 
                     if (isNurseAlreadyWorkingToday())
                         this.failed++;
-		            if(isNumberOfNightShiftsLessOrEqualThanThree())
+		            if(!isNumberOfNightShiftsLessOrEqualThanThree())
                         this.failed++;
-		            if(isNumberOfFreeWeekendsMoreOrEqualThenTwo())
+		            if(!isNumberOfFreeWeekendsMoreOrEqualThenTwo())
                         this.failed++;
-		            if(enoughRestAfterConsecutiveNightShifts())
+		            if(!enoughRestAfterConsecutiveNightShifts())
                         this.failed++;
-		            if(enoughRestIn24Hours())
+		            if(!enoughRestIn24Hours())
                         this.failed++;
-		            if(enoughRestAfterNightShift())
+		            if(!enoughRestAfterNightShift())
                         this.failed++;
-		            if(consecutiveNightShiftsConstraint())
+		            if(!consecutiveNightShiftsConstraint())
                         this.failed++;
-		            if(consecutiveWorkdaysConstraint())
+		            if(!consecutiveWorkdaysConstraint())
                         this.failed++;
                 }
             }
@@ -70,9 +70,9 @@ namespace GeneticAlgorithmSolutionToNSP
         }
 
         /*
-	 * The maximum number of night shifts is 3 per period of 5 consecutive
-	 * weeks.
-	 */
+	     * The maximum number of night shifts is 3 per period of 5 consecutive
+	     * weeks.
+	     */
         public bool isNumberOfNightShiftsLessOrEqualThanThree()
         {
             if (nurse.nightShiftsThisPeriod < 3)
