@@ -9,6 +9,9 @@ namespace GeneticAlgorithmSolutionToNSP
     public class Constraint
     {
         public int failed;
+        public Nurse nurse;
+        public int nurseId;
+        public int shift;
 
         public Constraint()
         {

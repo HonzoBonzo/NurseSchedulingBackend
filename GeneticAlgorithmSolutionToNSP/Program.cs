@@ -12,6 +12,7 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         static void Main(string[] args)
         {
+            NurseManager.initializeNurses();
             Selection sel = new Selection();
             Crossover cvr = new Crossover();
             Mutation mut = new Mutation();

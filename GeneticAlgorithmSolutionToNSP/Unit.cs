@@ -18,7 +18,6 @@ namespace GeneticAlgorithmSolutionToNSP
         public void Init() {
             this.importWeeks(); //importuje poprzednie 4 tygodnie
             this.makeChromosome(); //
-            this.rateStrength();
         }
 
         void importWeeks()
@@ -41,15 +40,6 @@ namespace GeneticAlgorithmSolutionToNSP
                     this.array[i, j] = randBool();
                 }
             }
-        }
-
-        void rateStrength()
-        {
-            HardConstraints hard = new HardConstraints(this.array);
-            this.failedHardConstraints = hard.Failed;
-
-            SoftConstraints soft = new SoftConstraints(this.array);
-            this.failedSoftConstraintsWeight = soft.Failed;
         }
 
         private bool randBool()
@@ -82,18 +72,18 @@ namespace GeneticAlgorithmSolutionToNSP
                 int randomShift = randShift();
                 //wiem ze moze sie ten sam zmutowac kilka razy, ale w czym to przeszkadza?
 
-                if (Helper.IsWeekend(randomShift) )
+                if (NurseCalculations.IsWeekend(randomShift) )
                 {
-                    if (!Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 2)
+                    if (!NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 2)
                         continue;
-                    if (Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 1)
+                    if (NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 1)
                         continue;
                 }
                 else
                 {
-                    if (!Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 3)
+                    if (!NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 3)
                         continue;
-                    if (Helper.isNightShift(randomShift) && Helper.GetNumberOfShifts(this, randomShift) > 1)
+                    if (NurseCalculations.isNightShift(randomShift) && NurseCalculations.GetNumberOfShifts(this, randomShift) > 1)
                         continue;
                 }
 
@@ -117,8 +107,8 @@ namespace GeneticAlgorithmSolutionToNSP
             this.array[nurseIndex, shiftIndex] = src.Array[nurseIndex, shiftIndex];
         }
 
-        public int FailedHardConstraints { get { return this.failedHardConstraints; } }
-        public int FailedSoftConstraints { get { return this.failedSoftConstraintsWeight; } }
+        public int FailedHardConstraints { get { return this.failedHardConstraints; } set { this.failedHardConstraints = value; } }
+        public int FailedSoftConstraints { get { return this.failedSoftConstraintsWeight; } set { this.failedSoftConstraintsWeight = value; } }
         public bool[,] Array { get { return this.array; } }
     }
 

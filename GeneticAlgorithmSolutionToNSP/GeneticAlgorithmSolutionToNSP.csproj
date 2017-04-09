@@ -45,8 +45,10 @@
     <Compile Include="HardConstraints.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Crossover.cs" />
-    <Compile Include="Helper.cs" />
+    <Compile Include="NurseCalculations.cs" />
     <Compile Include="Mutation.cs" />
+    <Compile Include="Nurse.cs" />
+    <Compile Include="NurseManager.cs" />
     <Compile Include="Population.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

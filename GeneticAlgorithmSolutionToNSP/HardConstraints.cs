@@ -10,86 +10,249 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         private bool[,] arr;
 
+        public int getFailed()
+        {
+            return this.failed;
+        }
+
         public HardConstraints() : base(){}
 
         public HardConstraints(bool[,] p)
         {
             this.arr = p;
-            this.constraint1();
-            this.constraint2();
-            this.constraint3();
-            this.constraint4();
-            this.constraint5();
-            this.constraint6();
-            this.constraint7();
-            this.constraint8();
-            this.constraint9();
-            this.constraint10();
+
+            for (int nurseId = 0; nurseId < Constants.NURSE_NUMBER; nurseId++)
+            {
+                for (int shift = 0; shift < Constants.SHIFTS_NUMBER; shift++)
+                {
+                    this.nurseId = nurseId;
+                    this.shift = shift;
+		            this.nurse = NurseManager.getNurse(nurseId);
+
+                    if (nurse.totalWorkedTime > nurse.hoursPerWeek * 4)
+                        this.failed++;
+
+                    if (isNurseAlreadyWorkingToday())
+                        this.failed++;
+		            if(isNumberOfNightShiftsLessOrEqualThanThree())
+                        this.failed++;
+		            if(isNumberOfFreeWeekendsMoreOrEqualThenTwo())
+                        this.failed++;
+		            if(enoughRestAfterConsecutiveNightShifts())
+                        this.failed++;
+		            if(enoughRestIn24Hours())
+                        this.failed++;
+		            if(enoughRestAfterNightShift())
+                        this.failed++;
+		            if(consecutiveNightShiftsConstraint())
+                        this.failed++;
+		            if(consecutiveWorkdaysConstraint())
+                        this.failed++;
+                }
+            }
+
+
+	    }
+
+        /*
+         * For each day a nurse may start only one shift
+         */
+        public bool isNurseAlreadyWorkingToday()
+        {
+            bool[] nurseScheduleForTheDay = getNurseDaySchedule(this.nurseId, this.shift);
+            for (int i = 0; i < 4; i++)
+            {
+                if (nurseScheduleForTheDay[i])
+                    return true;
+            }
+
+            return false;
         }
 
-        /* The number of consecutive shifts (workdays) is at most 6 */
-        private void constraint10()
+        /*
+	 * The maximum number of night shifts is 3 per period of 5 consecutive
+	 * weeks.
+	 */
+        public bool isNumberOfNightShiftsLessOrEqualThanThree()
         {
-            this.failed++;
+            if (nurse.nightShiftsThisPeriod < 3)
+                return true;
+
+            return false;
         }
 
-        /* The number of consecutive night shifts is at most 3 */
-        private void constraint9()
+        /*
+         * A nurse must receive at least 2 weekends off duty per 5 week period. A
+         * weekend off duty lasts 60 hours including Saturday 00:00 to Monday 04:00.
+         */
+        public bool isNumberOfFreeWeekendsMoreOrEqualThenTwo()
         {
-            this.failed++;
+            int freeWeekends = 4 - nurse.workingWeekends;
+
+            if (freeWeekends >= 2)
+                return true;
+
+            return false;
         }
 
-        /* A night shift has to be followed by at least 14 hours rest. An exception is that once in a 
-        period of 21 days for 24 consecutive hours, the resting time may be reduced to 8 hours */
-        private void constraint8()
+        /*
+         * Following a series of at least 2 consecutive night shifts a 42 hours rest
+         * is required.
+         */
+        public bool enoughRestAfterConsecutiveNightShifts()
         {
-            this.failed++;
+            int consecutiveNightShifts = nurse.consecutiveNightShifts;
+
+            if (consecutiveNightShifts >= 2)
+            {
+                int previousShift = getPreviousShift();
+                int daysBetween = NurseCalculations.convertShiftToDay(shift)
+                        - NurseCalculations.convertShiftToDay(previousShift);
+
+                if (previousShift == -1)
+                    return true;
+
+                if (daysBetween > 2)
+                    return true;
+                else
+                {
+                    int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
+                    if (rest >= 42)
+                        return true;
+                    else
+                        return false;
+
+                }
+            }
+
+            return true;
         }
 
-        /* During any period of 24 consecutive hours, at least 11 hours of rest is required. */
-        private void constraint7()
+        /*
+         * During any period of 24 consecutive hours, at least 11 hours of rest is
+         * required.
+         */
+        public bool enoughRestIn24Hours()
         {
-            this.failed++;
+            int previousShift = getPreviousShift();
+            int daysBetween = NurseCalculations.convertShiftToDay(shift)
+                    - NurseCalculations.convertShiftToDay(previousShift);
+
+            // its going to be the first shift - no need to rest
+            if (previousShift == -1)
+                return true;
+
+            if (daysBetween > 1)
+                return true;
+
+            else
+            {
+                int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
+                if (rest >= 11)
+                    return true;
+                else
+                    return false;
+            }
         }
 
-        /* Following a series of at least 2 consecutive night shifts a 42 hours rest is required. */
-        private void constraint6()
+        /*
+         * A night shift has to be followed by at least 14 hours rest. An exception
+         * is that once in a period of 21 days for 24 consecutive hours, the resting
+         * time may be reduced to 8 hours.
+         */
+        public bool enoughRestAfterNightShift()
         {
-            this.failed++;
+            int previousShift = getPreviousShift();
+
+            // its going to be the first shift - no need to rest
+            if (previousShift == -1)
+                return true;
+
+            if (NurseCalculations.isNightShift(previousShift))
+            {
+                int restTime = NurseCalculations.timeBetweenShifts(previousShift, shift);
+                if (restTime >= 14)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (nurse.exceptionForRestAfterNightShift == false)
+                    {
+                        nurse.exceptionForRestAfterNightShift = true;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+            else
+                return true;
         }
 
-        /* A nurse must receive at least 2 weekends off duty per 5 week period. A weekend off duty 
-        lasts 60 hours including Saturday 00:00 to Monday 04:00 */
-        private void constraint5()
+        /*
+         * The	number	of	consecutive	night	shifts	is	at	most	3.	
+         */
+
+        public bool consecutiveNightShiftsConstraint()
         {
-            this.failed++;
+            if (nurse.consecutiveNightShifts < 3)
+                return true;
+            else
+                return false;
         }
 
-        /* The maximum number of night shifts is 3 per period of 5 consecutive weeks. */
-        private void constraint4()
+        /*
+         * The	number	of	consecutive	shifts	(workdays)	is	at	most	6.	
+         */
+
+        public bool consecutiveWorkdaysConstraint()
         {
-            this.failed++;
+            if (nurse.consecutiveShifts < 6)
+                return true;
+            else
+                return false;
         }
 
-        /* Within a scheduling period a	nurse is allowed to exceed the number of hours for which	
-        they are available for their department	by at most 4 hours.	*/
-        private void constraint3()
+        /*
+	     * HELPER FUNCTIONS
+	     */
+        public bool[] getNurseDaySchedule(int nurseId, int shift)
         {
-            this.failed++;
+            bool[] nurseDayShedule = new bool[4];
+            int day = NurseCalculations.convertShiftToDay(shift);
+            int firstShiftThatDay = NurseCalculations.getFirstShiftFromTheDay(day);
+
+            nurseDayShedule[0] = arr[nurseId,firstShiftThatDay];
+            nurseDayShedule[1] = arr[nurseId,firstShiftThatDay + 1];
+            nurseDayShedule[2] = arr[nurseId,firstShiftThatDay + 2];
+            nurseDayShedule[3] = arr[nurseId,firstShiftThatDay + 3];
+
+            return nurseDayShedule;
         }
 
-        /* For each day a nurse may start only one shift. */	
-        private void constraint2()
+        public int getPreviousShift()
         {
+            bool[] nurseSchedule = this.getRowForNurse(nurseId);
+            
+            for (int i = shift - 1; i >= 0; i--)
+            {
+                if (nurseSchedule[i])
+                    return i;
+            }
 
-
-            this.failed++;
+            return -1;
         }
 
-        /* Cover needs to be fulfilled (i.e. no shifts must be left	unassigned). */
-        private void constraint1()
+        private bool[] getRowForNurse(int nurseId)
         {
-            this.failed++;
+            bool[] row = new bool[Constants.SHIFTS_NUMBER];
+            for (int i = 0; i < Constants.SHIFTS_NUMBER; i++)
+            {
+                row[i] = this.arr[nurseId, i];
+            }
+
+            return row;
         }
 
         public int Failed { get; set; }
