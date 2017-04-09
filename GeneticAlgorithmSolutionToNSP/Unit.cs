@@ -11,12 +11,12 @@ namespace GeneticAlgorithmSolutionToNSP
         bool[,] array = new bool[Constants.NURSE_NUMBER, Constants.SHIFTS_NUMBER];
         int failedHardConstraints;
         int failedSoftConstraintsWeight;
-
+        Random randomGen = new Random();
 
         public Unit() { }
 
         public void Init() {
-            this.importWeeks(); //importuje poprzednie 4 tygodnie
+            //this.importWeeks(); //importuje poprzednie 4 tygodnie
             this.makeChromosome(); //
         }
 
@@ -42,24 +42,24 @@ namespace GeneticAlgorithmSolutionToNSP
             }
         }
 
-        private bool randBool()
+        public bool randBool()
         {
-            Random randomGen = new Random();
+            
             /* losujemy od 0 - 16 liczbe, dla 0 zwracamy true czyli x w naszym grafiku, false'ow jest duzo wiecej */
-            bool val = randomGen.Next(Constants.MAX_RANDOM_NUMBER_BOOL) == 0 ? true : false;
-            return val;
+            int val = randomGen.Next(0,Constants.MAX_RANDOM_NUMBER_BOOL) ;
+            return val == 0 ? true : false;
         }
 
         private int randNurse()
         {
-            Random randGen = new Random();
-            return randGen.Next(Constants.NURSE_NUMBER); ;
+            //Random randGen = new Random();
+            return randomGen.Next(Constants.NURSE_NUMBER); ;
         }
 
         private int randShift()
         {
-            Random randGen = new Random();
-            return randGen.Next(Constants.SHIFTS_TO_SCHEDULE_NUMBER) + Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX;
+            //Random randGen = new Random();
+            return randomGen.Next(Constants.SHIFTS_TO_SCHEDULE_NUMBER) + Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX;
         }
 
         public Unit Mutate()

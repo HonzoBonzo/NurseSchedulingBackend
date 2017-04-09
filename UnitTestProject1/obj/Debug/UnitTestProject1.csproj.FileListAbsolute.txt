@@ -1,0 +1,7 @@
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\bin\Debug\UnitTestProject1.dll
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\bin\Debug\UnitTestProject1.pdb
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\bin\Debug\GeneticAlgorithmSolutionToNSP.exe
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\bin\Debug\GeneticAlgorithmSolutionToNSP.pdb
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\obj\Debug\UnitTestProject1.csprojResolveAssemblyReference.cache
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\obj\Debug\UnitTestProject1.dll
+C:\Users\Honzo\Documents\Visual Studio 2013\Projects\GeneticAlgorithmSolutionToNSP\UnitTestProject1\obj\Debug\UnitTestProject1.pdb
