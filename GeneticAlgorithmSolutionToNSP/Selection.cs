@@ -10,9 +10,20 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         public Selection() { }
 
-        internal void MakeSelection(ref Unit[] popArr)
+        public static void rateStrength(ref Unit[] popArr)
         {
-            sortPopulation(ref popArr);
+            foreach (Unit u in popArr)
+            {
+                HardConstraints hard = new HardConstraints(u.Array);
+                u.FailedHardConstraints = hard.getFailed();
+
+                SoftConstraints soft = new SoftConstraints(u.Array);
+                u.FailedSoftConstraints = soft.Failed;
+            }
+        }
+
+        public void MakeSelection(ref Unit[] popArr)
+        {
             selectGoodUnits(ref popArr);
         }
 
@@ -28,13 +39,13 @@ namespace GeneticAlgorithmSolutionToNSP
             return result;
         }
 
-        private void sortPopulation(ref Unit[] populationArray) {
+        public static void sortPopulation(ref Unit[] populationArray) {
             quickSortHard(ref populationArray, 0, populationArray.Length - 1);
             //quickSortSoft(ref populationArray, 0, populationArray.Length - 1); 
         }
 
         //nie wiem czy to dobrze dziala, nietestowane!!
-        private void quickSortHard(ref Unit[] array, int left, int right)
+        private static void quickSortHard(ref Unit[] array, int left, int right)
         {
             var i = left;
             var j = right;

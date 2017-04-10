@@ -8,19 +8,6 @@ namespace GeneticAlgorithmSolutionToNSP
 {
     public class NurseCalculations
     {
-
-        public static void rateStrength(ref Unit[] popArr)
-        {
-            foreach(Unit u in popArr)
-            {
-                HardConstraints hard = new HardConstraints(u.Array);
-                u.FailedHardConstraints = hard.getFailed();
-
-                SoftConstraints soft = new SoftConstraints(u.Array);
-                u.FailedSoftConstraints= soft.Failed;
-            }
-        }
-
         public static bool IsWeekend(int shift)
         {
             int value = shift % 28;

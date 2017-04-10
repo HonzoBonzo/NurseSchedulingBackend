@@ -35,7 +35,7 @@ namespace GeneticAlgorithmSolutionToNSP
             } 
         }
 
-        public static float UNIT_MUTATION_RATIO { get { return 0.2f; } }
+        public static float UNIT_MUTATION_RATIO { get { return 0.01f; } }
         public static float POPULATION_MUTATION_RATIO { get { return 0.2f; } }
 
         public static int UNIT_MUTATION_NUMBER { get { return (int)(UNIT_MUTATION_RATIO * SHIFTS_NUMBER); } }
