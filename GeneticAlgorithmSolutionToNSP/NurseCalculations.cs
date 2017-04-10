@@ -9,7 +9,7 @@ namespace GeneticAlgorithmSolutionToNSP
     public class NurseCalculations
     {
 
-        public static void rateStrength(Unit[] popArr)
+        public static void rateStrength(ref Unit[] popArr)
         {
             foreach(Unit u in popArr)
             {

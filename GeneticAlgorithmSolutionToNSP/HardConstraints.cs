@@ -22,12 +22,10 @@ namespace GeneticAlgorithmSolutionToNSP
             this.arr = p;
 
             for (int nurseId = 0; nurseId < Constants.NURSE_NUMBER; nurseId++)
-            {
                 for (int shift = 0; shift < Constants.SHIFTS_NUMBER; shift++)
-                {
-                    this.setSchedule(nurseId, shift);
-                }
-            }
+                    if (this.arr[nurseId, shift])
+                        this.setSchedule(nurseId, shift);                    
+
 
             for (int nurseId = 0; nurseId < Constants.NURSE_NUMBER; nurseId++)
             {
@@ -91,7 +89,7 @@ namespace GeneticAlgorithmSolutionToNSP
             }
 
             nurse.workedYesterday = true;
-            //this.arr[nurseId,shift] = true;
+            this.arr[nurseId,shift] = true;
         }
 
         /*

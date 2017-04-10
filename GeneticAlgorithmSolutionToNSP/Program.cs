@@ -20,7 +20,7 @@ namespace GeneticAlgorithmSolutionToNSP
 
             pop.SimulateAlgorithm();
 
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 }

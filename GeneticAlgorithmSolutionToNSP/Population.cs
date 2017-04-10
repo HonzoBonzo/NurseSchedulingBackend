@@ -32,13 +32,13 @@ namespace GeneticAlgorithmSolutionToNSP
         public void SimulateAlgorithm() {
             for (int i = 0; i < Constants.EPOCHS_NUMBER; i++)
             {
-                NurseCalculations.rateStrength(this.arr);
-                selectionMethod.MakeSelection(this.arr);
-                crossoverMethod.MakeCrossover(this.arr);
-                mutationMethod.MakeMutation(this.arr);
+                NurseCalculations.rateStrength(ref this.arr);
+                selectionMethod.MakeSelection(ref this.arr);
+                crossoverMethod.MakeCrossover(ref this.arr);
+                mutationMethod.MakeMutation(ref this.arr);
 
                 Console.WriteLine(
-                    "Generacja nr: {0}, failed hardy: {1}, , failed softy: {1}", 
+                    "Generacja nr: {0}, failed hardy: {1}, , failed softy: {2}", 
                     i + 1, 
                     this.arr[0].FailedHardConstraints, 
                     this.arr[0].FailedSoftConstraints

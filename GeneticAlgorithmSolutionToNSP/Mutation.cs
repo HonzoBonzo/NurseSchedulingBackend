@@ -10,11 +10,11 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         public Mutation() { }
 
-        internal void MakeMutation(Unit[] unitArr)
+        internal void MakeMutation(ref Unit[] unitArr)
         {
             for (int i = 0; i < Constants.POPULATION_MUTATION_NUMBER; i++)
             {
-                unitArr[i].Mutate();
+                unitArr[i] = unitArr[i].Mutate();
             }
         }
     }

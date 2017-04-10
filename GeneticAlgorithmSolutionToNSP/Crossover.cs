@@ -10,25 +10,25 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         public Crossover() { }
 
-        internal void MakeCrossover(Unit[] unit)
+        internal void MakeCrossover(ref Unit[] units)
         {
-            this.consecutiveTwoHalfsMethod(unit);
+            this.consecutiveTwoHalfsMethod(ref units);
         }
 
-        private void consecutiveTwoHalfsMethod(Unit[] units)
+        private void consecutiveTwoHalfsMethod(ref Unit[] units)
         {
             int populationLen = units.Length;
             int numberOfPairs = populationLen / 2;
-            units = Array.Resize(ref units, populationLen + numberOfPairs);
+            Array.Resize(ref units, populationLen + numberOfPairs);
             
 
             for (int i = 0; i < numberOfPairs; i++)
             {
-                units[populationLen + i] = this.makeChildConsecutiveTwoHalfsMethod(units[i * 2], units[i * 2 + 1]);
+                units[populationLen + i] = this.makeChildConsecutiveTwoHalfsMethod(ref units[i * 2], ref units[i * 2 + 1]);
             }
         }
 
-        private Unit makeChildConsecutiveTwoHalfsMethod(Unit father, Unit mother)
+        private Unit makeChildConsecutiveTwoHalfsMethod(ref Unit father, ref Unit mother)
         { 
             Unit child = new Unit();
 

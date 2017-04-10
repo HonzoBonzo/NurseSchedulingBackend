@@ -10,13 +10,13 @@ namespace GeneticAlgorithmSolutionToNSP
     {
         public Selection() { }
 
-        internal void MakeSelection(Unit[] popArr)
+        internal void MakeSelection(ref Unit[] popArr)
         {
-            sortPopulation(popArr);
-            selectGoodUnits(popArr);
+            sortPopulation(ref popArr);
+            selectGoodUnits(ref popArr);
         }
 
-        private void selectGoodUnits(Unit[] popArr)
+        private void selectGoodUnits(ref Unit[] popArr)
         {
             popArr = subArray(popArr, 0, Constants.POPULATION_SIZE);
         }
@@ -28,13 +28,13 @@ namespace GeneticAlgorithmSolutionToNSP
             return result;
         }
 
-        private void sortPopulation(Unit[] populationArray) {
-            quickSortHard(populationArray, 0, populationArray.Length - 1);
-            quickSortSoft(populationArray, 0, populationArray.Length - 1);
+        private void sortPopulation(ref Unit[] populationArray) {
+            quickSortHard(ref populationArray, 0, populationArray.Length - 1);
+            //quickSortSoft(ref populationArray, 0, populationArray.Length - 1); 
         }
 
         //nie wiem czy to dobrze dziala, nietestowane!!
-        private void quickSortHard(Unit[] array, int left, int right)
+        private void quickSortHard(ref Unit[] array, int left, int right)
         {
             var i = left;
             var j = right;
@@ -51,11 +51,11 @@ namespace GeneticAlgorithmSolutionToNSP
                     array[j--] = tmp;
                 }
             }
-            if (left < j) quickSortHard(array, left, j);
-            if (i < right) quickSortHard(array, i, right);
+            if (left < j) quickSortHard(ref array, left, j);
+            if (i < right) quickSortHard(ref array, i, right);
         }
 
-        private void quickSortSoft(Unit[] array, int left, int right)
+        private void quickSortSoft(ref Unit[] array, int left, int right)
         {
             var i = left;
             var j = right;
@@ -72,8 +72,8 @@ namespace GeneticAlgorithmSolutionToNSP
                     array[j--] = tmp;
                 }
             }
-            if (left < j) quickSortSoft(array, left, j);
-            if (i < right) quickSortSoft(array, i, right);
+            if (left < j) quickSortSoft(ref array, left, j);
+            if (i < right) quickSortSoft(ref array, i, right);
         }
 
     }
