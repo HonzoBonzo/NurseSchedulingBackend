@@ -107,8 +107,15 @@ namespace GeneticAlgorithmSolutionToNSP
             this.array[nurseIndex, shiftIndex] = src.Array[nurseIndex, shiftIndex];
         }
 
-        public int FailedHardConstraints { get { return this.failedHardConstraints; } set { this.failedHardConstraints = value; } }
-        public int FailedSoftConstraints { get { return this.failedSoftConstraintsWeight; } set { this.failedSoftConstraintsWeight = value; } }
+        public int FailedHardConstraints { 
+            get { return this.failedHardConstraints; } 
+            set { this.failedHardConstraints = value; 
+            } 
+        }
+        public int FailedSoftConstraints { 
+            get { return this.failedSoftConstraintsWeight; } 
+            set { this.failedSoftConstraintsWeight = value; } 
+        }
         public bool[,] Array { get { return this.array; } }
     }
 

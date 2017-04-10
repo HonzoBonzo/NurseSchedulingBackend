@@ -38,8 +38,8 @@ namespace GeneticAlgorithmSolutionToNSP
         public static int UNIT_MUTATION_RATIO { get { return 1 / 5; } }
         public static int POPULATION_MUTATION_RATIO { get { return 1 / 5; } }
 
-        public static int UNIT_MUTATION_NUMBER { get { return (int)(UNIT_MUTATION_RATIO * SHIFTS_TO_SCHEDULE_NUMBER); } }
-        public static int POPULATION_MUTATION_NUMBER { get { return (int)(POPULATION_MUTATION_RATIO * SHIFTS_TO_SCHEDULE_NUMBER); } }
+        public static int UNIT_MUTATION_NUMBER { get { return 20; } }
+        public static int POPULATION_MUTATION_NUMBER { get { return 20; } }
 
         public static int FIRST_HALF_SHIFTS_TO_SCHEDULE_FIRST_INDEX { get { return FIRST_SHIFT_TO_SCHEDULE_INDEX; } }
         public static int FIRST_HALF_SHIFTS_TO_SCHEDULE_LAST_INDEX { get { return FIRST_SHIFT_TO_SCHEDULE_INDEX + SHIFTS_NUMBER/2; } }
