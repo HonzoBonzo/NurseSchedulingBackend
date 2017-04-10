@@ -46,23 +46,23 @@ namespace GeneticAlgorithmSolutionToNSP
         {
             
             /* losujemy od 0 - 16 liczbe, dla 0 zwracamy true czyli x w naszym grafiku, false'ow jest duzo wiecej */
-            int val = randomGen.Next(0,Constants.MAX_RANDOM_NUMBER_BOOL) ;
+            int val = randomGen.Next(0, Constants.MAX_RANDOM_NUMBER_BOOL) ;
             return val == 0 ? true : false;
         }
 
         private int randNurse()
         {
             //Random randGen = new Random();
-            return randomGen.Next(Constants.NURSE_NUMBER); ;
+            return randomGen.Next(0, Constants.NURSE_NUMBER); ;
         }
 
         private int randShift()
         {
             //Random randGen = new Random();
-            return randomGen.Next(Constants.SHIFTS_TO_SCHEDULE_NUMBER) + Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX;
+            return randomGen.Next(0, Constants.SHIFTS_TO_SCHEDULE_NUMBER) + Constants.FIRST_SHIFT_TO_SCHEDULE_INDEX;
         }
 
-        public Unit Mutate()
+        public void Mutate()
         {
             int numberToMutate = Constants.UNIT_MUTATION_NUMBER;
             
@@ -94,7 +94,6 @@ namespace GeneticAlgorithmSolutionToNSP
 
                 numberToMutate--;
             }
-            return this;
         }
 
         public void SetShift(int nurseIndex, int shiftIndex)

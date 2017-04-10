@@ -14,7 +14,7 @@ namespace GeneticAlgorithmSolutionToNSP
         {
             for (int i = 0; i < Constants.POPULATION_MUTATION_NUMBER; i++)
             {
-                unitArr[i] = unitArr[i].Mutate();
+                unitArr[i].Mutate();
             }
         }
     }

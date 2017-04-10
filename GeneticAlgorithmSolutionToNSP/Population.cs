@@ -38,7 +38,7 @@ namespace GeneticAlgorithmSolutionToNSP
                 mutationMethod.MakeMutation(ref this.arr);
 
                 Console.WriteLine(
-                    "Generacja nr: {0}, failed hardy: {1}, , failed softy: {2}", 
+                    "Generacja nr: {0}, failed hardy: {1}, failed softy: {2}", 
                     i + 1, 
                     this.arr[0].FailedHardConstraints, 
                     this.arr[0].FailedSoftConstraints
