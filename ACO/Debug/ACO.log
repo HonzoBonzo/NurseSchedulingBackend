@@ -1,0 +1,13 @@
+﻿  ACO.cpp
+g:\studia\vi\pz\aco\aco\hardconstraint.h(79): warning C4228: nonstandard extension used: qualifiers after comma in declarator list are ignored
+g:\studia\vi\pz\aco\aco\softconstraint.h(63): warning C4228: nonstandard extension used: qualifiers after comma in declarator list are ignored
+g:\studia\vi\pz\aco\aco\randoms.cpp(71): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\randoms.cpp(72): warning C4305: 'return': truncation from 'double' to 'float'
+g:\studia\vi\pz\aco\aco\randoms.cpp(89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\randoms.cpp(90): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\randoms.cpp(94): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\aco.cpp(11): warning C4244: 'initializing': conversion from 'time_t' to 'long', possible loss of data
+g:\studia\vi\pz\aco\aco\aco.cpp(22): warning C4297: 'ACO::~ACO': function assumed not to throw an exception but does
+  g:\studia\vi\pz\aco\aco\aco.cpp(22): note: destructor or deallocator has a (possibly implicit) non-throwing exception specification
+  ACO.vcxproj -> G:\Studia\VI\PZ\ACO\ACO\Debug\ACO.exe
+  ACO.vcxproj -> G:\Studia\VI\PZ\ACO\ACO\Debug\ACO.pdb (Partial PDB)
