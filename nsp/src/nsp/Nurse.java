@@ -15,6 +15,7 @@ public class Nurse {
 	 boolean exceptionForRestAfterNightShift;
 	 boolean startedShiftToday;
 
+	 boolean thisWeekend;
 
 
 	public Nurse(int id, int hoursPerWeek){

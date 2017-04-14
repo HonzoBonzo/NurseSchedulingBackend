@@ -1,8 +1,10 @@
 package dataflow;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Scanner;
 
 public class ExportScheduleToHtml {
 
@@ -12,8 +14,19 @@ public class ExportScheduleToHtml {
 		this.schedule = schedule;
 	}
 	
-	public void exportScheduleToHtml() throws FileNotFoundException, UnsupportedEncodingException{
-		PrintWriter writer = new PrintWriter("results.html", "UTF-8");
+	public int importBestResult() throws FileNotFoundException{
+		Scanner scanner = new Scanner(new File("bestResult.txt"));
+		return scanner.nextInt();
+	}
+	
+	public void exportBestResult(int bestResult) throws FileNotFoundException, UnsupportedEncodingException{
+		PrintWriter writer = new PrintWriter("bestResult.txt", "UTF-8");
+		writer.print(bestResult);
+		writer.close();
+	}
+	
+	public void exportScheduleToHtml(String filename) throws FileNotFoundException, UnsupportedEncodingException{
+		PrintWriter writer = new PrintWriter(filename + ".html", "UTF-8");
 		
 		
 		writer.println("<table>");

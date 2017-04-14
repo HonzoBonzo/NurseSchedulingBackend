@@ -73,13 +73,32 @@ public class checkWeekendsTest {
 	public void checkTimeBetweenShifts(){
 		//more tests required
 		
-		assertEquals(15, NurseCalculations.timeBetweenShifts(0, 4)); //1
-		assertEquals(64, NurseCalculations.timeBetweenShifts(1, 12)); //4
-		assertEquals(40, NurseCalculations.timeBetweenShifts(3, 11)); //3
-		assertEquals(16, NurseCalculations.timeBetweenShifts(59, 63)); //6
-		assertEquals(48, NurseCalculations.timeBetweenShifts(87, 97)); //2
-		assertEquals(0, NurseCalculations.timeBetweenShifts(87, 89)); //5
+		assertEquals(63, NurseCalculations.timeBetweenShifts(2, 14));	//1
+		assertEquals(64, NurseCalculations.timeBetweenShifts(1, 12)); //1
+		assertEquals(63, NurseCalculations.timeBetweenShifts(88, 100)); //1
 		
+		assertEquals(48, NurseCalculations.timeBetweenShifts(87, 97)); //2
+		assertEquals(72, NurseCalculations.timeBetweenShifts(66, 79)); //2
+		
+		assertEquals(72, NurseCalculations.timeBetweenShifts(58, 71)); //3
+		assertEquals(78, NurseCalculations.timeBetweenShifts(88, 103)); //3
+		
+		assertEquals(40, NurseCalculations.timeBetweenShifts(3, 11)); //4
+		assertEquals(88, NurseCalculations.timeBetweenShifts(91, 107)); //4
+		
+		assertEquals(15, NurseCalculations.timeBetweenShifts(0, 4)); //5
+		assertEquals(14, NurseCalculations.timeBetweenShifts(0, 5)); //5
+		assertEquals(15, NurseCalculations.timeBetweenShifts(122, 126)); //5
+		
+		assertEquals(0, NurseCalculations.timeBetweenShifts(87, 89)); //6
+		assertEquals(7, NurseCalculations.timeBetweenShifts(91, 94)); //6
+		
+		assertEquals(31, NurseCalculations.timeBetweenShifts(13, 19)); //7
+		assertEquals(30, NurseCalculations.timeBetweenShifts(64, 71)); //7
+		
+		assertEquals(16, NurseCalculations.timeBetweenShifts(59, 63)); //8
+		assertEquals(16, NurseCalculations.timeBetweenShifts(123, 127)); //8
+
 	}
 	
 	

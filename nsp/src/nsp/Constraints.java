@@ -43,42 +43,42 @@ public class Constraints {
 		this.schedule = schedule;
 		this.nurse = NurseManager.getNurse(nurseId);
 
-		if (nurse.totalWorkedTime > nurse.hoursPerWeek * 4) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: godziny");
+		if (nurse.totalWorkedTime + 8 > nurse.hoursPerWeek * 5 + 4) {
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: godziny");
 			return false;
 		}
 
 		if (isNurseAlreadyWorkingToday()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h1");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h1");
 			return false;
 		}
 
 		if (!isNumberOfNightShiftsLessOrEqualThanThree()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h2");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h2");
 			return false;
 		}
 		if (!isNumberOfFreeWeekendsMoreOrEqualThenTwo()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h3");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h3");
 			return false;
 		}
 		if (!enoughRestAfterConsecutiveNightShifts()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h4");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h4");
 			return false;
 		}
 		if (!enoughRestIn24Hours()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h5");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h5");
 			return false;
 		}
 		if (!enoughRestAfterNightShift()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h6");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h6");
 			return false;
 		}
 		if (!consecutiveNightShiftsConstraint()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h7");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h7");
 			return false;
 		}
 		if (!consecutiveWorkdaysConstraint()) {
-			System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h8");
+			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h8");
 			return false;
 		}
 
@@ -102,8 +102,8 @@ public class Constraints {
 	 */
 	public boolean isNurseAlreadyWorkingToday() {
 
-		if (nurseId == 9 && shift == 19)
-			System.out.println("");
+		//if (nurseId == 9 && shift == 19)
+			//System.out.println("");
 		int[] nurseScheduleForTheDay = getNurseDaySchedule(nurseId, shift);
 		for (int i = 0; i < 4; i++) {
 			if (nurseScheduleForTheDay[i] == 1)
@@ -117,6 +117,7 @@ public class Constraints {
 	 * The maximum number of night shifts is 3 per period of 5 consecutive
 	 * weeks.
 	 */
+	//TODO
 	public boolean isNumberOfNightShiftsLessOrEqualThanThree() {
 		if (NurseCalculations.isNightShift(shift)) {
 			if (nurse.nightShiftsThisPeriod < 3)
@@ -190,7 +191,7 @@ public class Constraints {
 	 * During any period of 24 consecutive hours, at least 11 hours of rest is
 	 * required.
 	 */
-	public boolean enoughRestIn24Hours() {
+/*	public boolean enoughRestIn24Hours() {
 		int previousShift = getPreviousShift();
 		int daysBetween = NurseCalculations.convertShiftToDay(shift)
 				- NurseCalculations.convertShiftToDay(previousShift);
@@ -209,6 +210,27 @@ public class Constraints {
 			else
 				return false;
 		}
+	}*/
+	
+	public boolean enoughRestIn24Hours() {
+		int previousShift = getPreviousShift();
+		int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
+		if (previousShift == -1)
+			return true;
+		
+		if(rest == -1)
+			try {
+				//System.out.println("blaaaaaaaad");
+				throw new Exception("blaaad");
+			} catch (Exception e) {
+				System.exit(0);
+				
+			}
+		if (rest >= 11)
+			return true;
+		else
+			return false;
+
 	}
 
 	/*

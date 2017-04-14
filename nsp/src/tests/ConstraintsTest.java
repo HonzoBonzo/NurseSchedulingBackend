@@ -105,14 +105,20 @@ public class ConstraintsTest {
 
 		//w1
 		schedule.setSchedule(5, 20);
+		schedule.clearNurseDataWeekly();
 		//w2
 		schedule.setSchedule(5, 48);
+		schedule.clearNurseDataWeekly();
 		//w3
 		schedule.setSchedule(5, 76);
-		// cant heave 4th working weekend
+		schedule.clearNurseDataWeekly();
+		// cant have 4th working weekend
 		constraint.checkSchedule(5, 104, schedule.getAllSchedule());
 		assertEquals(false, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
 
+		
+		//new nurse
+		
 		Nurse nurse = NurseManager.getNurse(1);
 		//w1
 		schedule.setSchedule(1, 20);
@@ -120,9 +126,11 @@ public class ConstraintsTest {
 		//w1
 		schedule.setSchedule(1, 24);
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
+		schedule.clearNurseDataWeekly();
 		//w2
 		schedule.setSchedule(1, 76);
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
+		schedule.clearNurseDataWeekly();
 
 		// that will be 3rd not 4th working weekend
 		constraint.checkSchedule(1, 105, schedule.getAllSchedule());
@@ -133,6 +141,7 @@ public class ConstraintsTest {
 		System.out.println("y: " + nurse.workedYesterday + "| ww: " + nurse.workingWeekends);
 		//w3
 		constraint.checkSchedule(1, 108, schedule.getAllSchedule());
+		schedule.clearNurseDataWeekly();
 		assertEquals(true, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
 		
 		
@@ -170,6 +179,53 @@ public class ConstraintsTest {
 
 		// dopiero ok
 		constraint.checkSchedule(5, 16, schedule.getAllSchedule());
+		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
+	}
+	
+	@Test
+	//TODO
+	public void consecutiveNightShiftsRestTest2() {
+
+		// 2 consecutive night shifts
+		schedule.setSchedule(13, 35);
+		schedule.setSchedule(13, 39);
+		// koñczy prace w czwartek o 7:00 - moze zaczac pracowaæ najwczesniej w
+		// sobote od 1:00
+		// czyli de fakto od porannej zmiany w sobotê
+
+		// za wczeœnie
+		constraint.checkSchedule(13, 43, schedule.getAllSchedule());
+		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+
+		// ci¹gle za wczeœnie
+		constraint.checkSchedule(13, 44, schedule.getAllSchedule());
+		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+
+		// ci¹gle za wczeœnie
+		constraint.checkSchedule(13, 45, schedule.getAllSchedule());
+		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+		
+		// ci¹gle za wczeœnie
+		constraint.checkSchedule(13, 46, schedule.getAllSchedule());
+		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+		
+		// ci¹gle za wczeœnie
+		constraint.checkSchedule(13, 47, schedule.getAllSchedule());
+		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+		
+		
+		// dopiero ok
+		constraint.checkSchedule(13, 48, schedule.getAllSchedule());
+		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
+		
+		//wszystko póniej tez ok
+		constraint.checkSchedule(13, 49, schedule.getAllSchedule());
+		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
+		
+		constraint.checkSchedule(13, 55, schedule.getAllSchedule());
+		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
+		
+		constraint.checkSchedule(13, 120, schedule.getAllSchedule());
 		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
 	}
 

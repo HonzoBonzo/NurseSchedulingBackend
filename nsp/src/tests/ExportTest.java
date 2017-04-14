@@ -16,6 +16,6 @@ public class ExportTest {
 	public void ScheduleExport() throws FileNotFoundException, UnsupportedEncodingException{
 		Schedule schedule = new Schedule();
 		ExportScheduleToHtml export = new ExportScheduleToHtml(schedule.getAllSchedule());
-		export.exportScheduleToHtml();
+		export.exportScheduleToHtml("test export");
 	}
 }
