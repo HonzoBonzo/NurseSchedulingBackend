@@ -4,6 +4,7 @@
 #include <limits>
 #include <climits>
 #include <conio.h>
+#include <time.h>
 
 #include "ACO.h"
 
@@ -28,6 +29,7 @@ int main() {
 	int no_ants = 12;
 	int no_shifts = 5;
 	int iterations = 15;
+	clock_t clocks;
 
 	try {
 		// Create instance of ACO class:
@@ -41,10 +43,13 @@ int main() {
 
 		aco.initialize();
 
+		clocks = clock();
+
 		// Run ACO:
 		aco.run(iterations);
 
-		std::cout << std::endl << "Program has ended optimisation." << std::endl;
+		std::cout << std::endl << "Program has ended optimisation after " << iterations << " iterations and" 
+			<< (double(clock() - clocks) / double(CLOCKS_PER_SEC)) << " [s]." << std::endl;
 	} 
 	catch (ACOException me) {
 		std::cerr << me.what() << std::endl;

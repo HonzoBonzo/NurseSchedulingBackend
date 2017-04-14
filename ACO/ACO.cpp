@@ -24,41 +24,44 @@ ACO::~ACO() {
 }
 
 void ACO::run(int iterations) {
-	uint64_t _t;
+	clock_t clocks, clocks_it;
 	int h = 0;
 
+	clocks_it = clock();
 	for (int it = 1; it <= iterations; ++it) {
 
-		std::cout << "Iteration [" << it << "]" << std::endl;
+		std::cout << "Iteration [" << it << "] after " 
+			<< (double(clock() - clocks_it) / double(CLOCKS_PER_SEC)) << " [s]" << std::endl;
+		
 		// Ants should not go in sequence:
 		_shuffle_ants(3);
 
+		clocks = clock();
 		for (int ant = 0; ant < _no_ants; ++ant) {
-			_t = 1;
-			std::cout << "Realease [" << _ants[ant] << "] ant" << std::endl;
+			
+			std::cout << "Realease [" << _ants[ant] << "] ant after " 
+				<< (double(clock() - clocks) / double(CLOCKS_PER_SEC)) << " [s]" << std::endl;
 
 			// Run through graph until all hard constraints are valid:
 			do {
-				
-				++_t;
 				// Clear route path for current ant:
 				_clear_route(_ants[ant]);
 				
 				// Go through graph again:
 				_route(_ants[ant]);
 
-				//std::cout << "hards: " << h << "                                                \r" << std::flush;
+				std::cout << "hards: " << h << "                                                \r";
 
 			} while ((h = _hard_constraint_validation(_ants[ant])) != 0);
 		}
 
 		print_solution();
-		print_pheromones();
+		//print_pheromones();
 
 		// Update pheromones structure:
 		_update_pheromones();
 
-		// Remember the best result for ant:
+		// Remember the best result:
 		_remember_best();
 
 		// Clears routes for all ant colony:
@@ -124,7 +127,7 @@ void ACO::_route(int ant) {
 			// Set amount of days:
 			//_hard_constraint.set_days(d + 2);
 
-			std::cout << "day [" << d << "]   \r";
+			//std::cout << "day [" << d << "]   \r";
 
 		//} while ((h = _hard_constraint_validation(ant)) != 0);
 		
