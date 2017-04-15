@@ -7,6 +7,8 @@ public class Constraints {
 	int shift;
 	int[][] schedule;
 
+	int penalty = 0;
+
 	public Constraints() {
 
 	}
@@ -44,41 +46,50 @@ public class Constraints {
 		this.nurse = NurseManager.getNurse(nurseId);
 
 		if (nurse.totalWorkedTime + 8 > nurse.hoursPerWeek * 5 + 4) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: godziny");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: godziny");
 			return false;
 		}
 
 		if (isNurseAlreadyWorkingToday()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h1");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h1");
 			return false;
 		}
 
 		if (!isNumberOfNightShiftsLessOrEqualThanThree()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h2");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h2");
 			return false;
 		}
 		if (!isNumberOfFreeWeekendsMoreOrEqualThenTwo()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h3");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h3");
 			return false;
 		}
 		if (!enoughRestAfterConsecutiveNightShifts()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h4");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h4");
 			return false;
 		}
 		if (!enoughRestIn24Hours()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h5");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h5");
 			return false;
 		}
 		if (!enoughRestAfterNightShift()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h6");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h6");
 			return false;
 		}
 		if (!consecutiveNightShiftsConstraint()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h7");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h7");
 			return false;
 		}
 		if (!consecutiveWorkdaysConstraint()) {
-			//System.out.println("\nNurse:" + nurseId + " shift: " + shift + "constraint: h8");
+			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
+			// "constraint: h8");
 			return false;
 		}
 
@@ -94,6 +105,10 @@ public class Constraints {
 		 * if (h1 && h2 && h3 && h4 && h5 && h6 && h7 && h8) return true;
 		 */
 
+		// SOFT CONSTRAINT CHECK
+		this.penalty += noShiftsOrAtLeastTwoShiftsOnWeekends();
+		this.penalty += consecutiveNightShift();
+
 		return true;
 	}
 
@@ -102,8 +117,8 @@ public class Constraints {
 	 */
 	public boolean isNurseAlreadyWorkingToday() {
 
-		//if (nurseId == 9 && shift == 19)
-			//System.out.println("");
+		// if (nurseId == 9 && shift == 19)
+		// System.out.println("");
 		int[] nurseScheduleForTheDay = getNurseDaySchedule(nurseId, shift);
 		for (int i = 0; i < 4; i++) {
 			if (nurseScheduleForTheDay[i] == 1)
@@ -117,7 +132,7 @@ public class Constraints {
 	 * The maximum number of night shifts is 3 per period of 5 consecutive
 	 * weeks.
 	 */
-	//TODO
+	// TODO
 	public boolean isNumberOfNightShiftsLessOrEqualThanThree() {
 		if (NurseCalculations.isNightShift(shift)) {
 			if (nurse.nightShiftsThisPeriod < 3)
@@ -135,16 +150,16 @@ public class Constraints {
 	 * weekend off duty lasts 60 hours including Saturday 00:00 to Monday 04:00.
 	 */
 	public boolean isNumberOfFreeWeekendsMoreOrEqualThenTwo() {
-		
+
 		int previousShift = getPreviousShift();
-		if(NurseCalculations.checkIfItIsTheWeekend(previousShift)){
-			if(shift - previousShift < 8){
-				//then it was the same weekend
+		if (NurseCalculations.checkIfItIsTheWeekend(previousShift)) {
+			if (shift - previousShift < 8) {
+				// then it was the same weekend
 				return true;
 			}
 		}
-		
-		if(NurseCalculations.checkIfItIsTheWeekend(shift)){
+
+		if (NurseCalculations.checkIfItIsTheWeekend(shift)) {
 			int freeWeekends = 4 - nurse.workingWeekends;
 
 			if (freeWeekends >= 2)
@@ -152,7 +167,7 @@ public class Constraints {
 
 			return false;
 		}
-		
+
 		return true;
 
 	}
@@ -164,7 +179,7 @@ public class Constraints {
 	public boolean enoughRestAfterConsecutiveNightShifts() {
 		int consecutiveNightShifts = nurse.consecutiveNightShifts;
 
-		if (consecutiveNightShifts >= 2) {
+		if (consecutiveNightShifts >= 2 || nurse.notRestedAfterConsecutiveNights == true) {
 			int previousShift = getPreviousShift();
 			int daysBetween = NurseCalculations.convertShiftToDay(shift)
 					- NurseCalculations.convertShiftToDay(previousShift);
@@ -172,18 +187,25 @@ public class Constraints {
 			if (previousShift == -1)
 				return true;
 
-			if (daysBetween > 2)
+			if (daysBetween > 2) {
+				nurse.notRestedAfterConsecutiveNights = false;
 				return true;
+			}
+
 			else {
 				int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
-				if (rest >= 42)
+				if (rest >= 42) {
+					nurse.notRestedAfterConsecutiveNights = false;
 					return true;
+				}
+
 				else
 					return false;
 
 			}
 		}
 
+		nurse.notRestedAfterConsecutiveNights = false;
 		return true;
 	}
 
@@ -191,40 +213,34 @@ public class Constraints {
 	 * During any period of 24 consecutive hours, at least 11 hours of rest is
 	 * required.
 	 */
-/*	public boolean enoughRestIn24Hours() {
-		int previousShift = getPreviousShift();
-		int daysBetween = NurseCalculations.convertShiftToDay(shift)
-				- NurseCalculations.convertShiftToDay(previousShift);
+	/*
+	 * public boolean enoughRestIn24Hours() { int previousShift =
+	 * getPreviousShift(); int daysBetween =
+	 * NurseCalculations.convertShiftToDay(shift) -
+	 * NurseCalculations.convertShiftToDay(previousShift);
+	 * 
+	 * // its going to be the first shift - no need to rest if (previousShift ==
+	 * -1) return true;
+	 * 
+	 * if (daysBetween > 1) return true;
+	 * 
+	 * else { int rest = NurseCalculations.timeBetweenShifts(previousShift,
+	 * shift); if (rest >= 11) return true; else return false; } }
+	 */
 
-		// its going to be the first shift - no need to rest
-		if (previousShift == -1)
-			return true;
-
-		if (daysBetween > 1)
-			return true;
-
-		else {
-			int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
-			if (rest >= 11)
-				return true;
-			else
-				return false;
-		}
-	}*/
-	
 	public boolean enoughRestIn24Hours() {
 		int previousShift = getPreviousShift();
 		int rest = NurseCalculations.timeBetweenShifts(previousShift, shift);
 		if (previousShift == -1)
 			return true;
-		
-		if(rest == -1)
+
+		if (rest == -1)
 			try {
-				//System.out.println("blaaaaaaaad");
+				// System.out.println("blaaaaaaaad");
 				throw new Exception("blaaad");
 			} catch (Exception e) {
 				System.exit(0);
-				
+
 			}
 		if (rest >= 11)
 			return true;
@@ -283,4 +299,64 @@ public class Constraints {
 		else
 			return false;
 	}
+
+	/*
+	 * 
+	 * SOFT CONSTRAINTS
+	 * 
+	 * 
+	 */
+
+	/*
+	 * For the period of Friday 22:00 to Monday 0:00 a nurse should have either
+	 * no shifts or at least 2 shifts (‘Complete Weekend’).
+	 */
+	/*
+	 * public int noShiftsOrAtLeastTwoShiftsOnWeekends() {
+	 * 
+	 * //tylko w niedziele mozesz ocenic czy bylo zlamane w tym tygodniu czy nie
+	 * if(NurseCalculations.checkIfItIsSunday(shift)) if (nurse.softConstraint1
+	 * == 1) { System.out.println("SC: 1. Nurse: " + nurseId + " shift: " +
+	 * shift); return 1000; }
+	 * 
+	 * return 0; }
+	 */
+
+	public int noShiftsOrAtLeastTwoShiftsOnWeekends() {
+
+		int shiftsThisWeekTime = 0;
+		// sprawdzane na poprzedni tydzieñ w pierwsz¹ zmianê nastêpnego tygodnia
+		if (shift % 28 == 0 && shift != 0) {
+			// pobierz ostatnie 9 zmian, czyli do zmiany nocnej w pi¹tek
+			// w³¹cznie
+			for (int i = 1; i < 10; i++) {
+				if (schedule[nurseId][shift - i] == 1)
+					shiftsThisWeekTime++;
+			}
+		}
+
+		if (shiftsThisWeekTime == 1) {
+			System.out.println("SC: 1. Nurse: " + nurseId + " shift: " + shift);
+			return 1000;
+		}
+
+		return 0;
+
+	}
+
+	/*
+	 * For employees with availability of 30-48 hours per week, the length of a
+	 * series of night shifts should be within the range 2-3. It could be before
+	 * another series.
+	 */
+
+	public int consecutiveNightShift() {
+		if (nurse.lastConsecutiveNighShiftsSeries == 1) {
+			System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
+			return 1000;
+		}
+
+		return 0;
+	}
+
 }

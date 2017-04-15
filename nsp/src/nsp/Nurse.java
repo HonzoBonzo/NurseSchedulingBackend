@@ -3,11 +3,12 @@ package nsp;
 public class Nurse {
 
 	 int id;
-	 int hoursPerWeek;
+	 public int hoursPerWeek;
 	 
 	 int nightShiftThisWeekend;
 	 public int nightShiftsThisPeriod;
 	 int consecutiveNightShifts;
+	 int lastConsecutiveNighShiftsSeries = 0;
 	 public boolean workedYesterday;
 	 int consecutiveShifts;
 	 int totalWorkedTime;
@@ -16,6 +17,8 @@ public class Nurse {
 	 boolean startedShiftToday;
 
 	 boolean thisWeekend;
+	 boolean notRestedAfterConsecutiveNights;
+	public int softConstraint1 = 0;
 
 
 	public Nurse(int id, int hoursPerWeek){

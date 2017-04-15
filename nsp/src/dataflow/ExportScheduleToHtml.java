@@ -68,4 +68,17 @@ public class ExportScheduleToHtml {
 		writer.close();
 	}
 	
+	
+	public void exportScheduleToTxt(String filename) throws FileNotFoundException, UnsupportedEncodingException{
+		PrintWriter writer = new PrintWriter(filename + ".txt", "UTF-8");
+		
+		for(int i=0; i<16; i++){
+			if(i != 0)
+				writer.println("");
+			for(int j =0; j<140; j++)
+				writer.print(schedule[i][j] + " ");
+		}
+		
+		writer.close();
+	}
 }

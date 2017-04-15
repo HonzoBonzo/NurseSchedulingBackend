@@ -17,7 +17,15 @@ public class Program {
 		schedule.generateIndividual();
 		ExportScheduleToHtml export = new ExportScheduleToHtml(schedule.getAllSchedule());
 		export.exportScheduleToHtml("allHardConstrainedChecked");
-		System.out.println("Drukuje harmonogram");
+		//System.out.println("Drukuje harmonogram");
+		
+		export.exportScheduleToTxt("tab");
+		//System.out.println("Zapisuje do pliku");
+		
+		System.out.println("Penalty: " + schedule.getPenalty());
+		
+		
+		
 	}
 
 

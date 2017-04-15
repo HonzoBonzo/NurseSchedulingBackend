@@ -12,12 +12,16 @@ public class Schedule {
 
 	static int bestResult = 0;
 
-	int[][] schedule;
+	public int[][] schedule;
 	int[][] scheduleBackupLvl1, scheduleBackupLvl2;
 	double finess;
 	int shiftBackupLvl2;
 
 	Constraints constraint;
+	
+	public int getPenalty(){
+		return constraint.penalty;
+	}
 
 	// konstruuje pusty harmonogram
 	public Schedule() {
@@ -102,7 +106,7 @@ public class Schedule {
 	}
 
 	public void setSchedule(int nurseId, int shift) {
-		//System.out.println("\n+++ Nurse:" + nurseId + " shift: " + shift);
+		// System.out.println("\n+++ Nurse:" + nurseId + " shift: " + shift);
 
 		Nurse nurse = NurseManager.getNurse(nurseId);
 		boolean isWeekend = NurseCalculations.checkIfItIsTheWeekend(shift);
@@ -113,25 +117,33 @@ public class Schedule {
 		NurseCalculations.dayOfTheWeek(yesterday);
 
 		nurse.consecutiveShifts++;
+
+		
 		nurse.totalWorkedTime += 8;
 
 		if (isWeekend) {
-			if (!nurse.thisWeekend){
+			if (!nurse.thisWeekend) {
 				nurse.workingWeekends++;
 				nurse.thisWeekend = true;
 			}
-				
-				
 
 		}
 
 		if (isNightShift) {
 			nurse.consecutiveNightShifts++;
+			if(nurse.consecutiveNightShifts >= 2)
+				nurse.notRestedAfterConsecutiveNights = true;
 			nurse.nightShiftsThisPeriod++;
 			nurse.nightShiftThisWeekend++;
-			//System.out.println("Inkrementuje dla nursa: " + nurseId + " shift: " + shift + " nightSHiftsThisPeriod: "
-			//		+ nurse.nightShiftsThisPeriod);
+			// System.out.println("Inkrementuje dla nursa: " + nurseId + "
+			// shift: " + shift + " nightSHiftsThisPeriod: "
+			// + nurse.nightShiftsThisPeriod);
 		}
+		
+		
+		if((shift % 28) > 18)
+			//bo bedzie to pierwsza zmiana w weekend
+			nurse.softConstraint1++;
 
 		nurse.workedYesterday = true;
 		this.schedule[nurseId][shift] = 1;
@@ -143,6 +155,7 @@ public class Schedule {
 			nurse = NurseManager.getNurse(i);
 			nurse.nightShiftThisWeekend = 0;
 			nurse.thisWeekend = false;
+			nurse.softConstraint1 = 0;
 		}
 	}
 
@@ -150,8 +163,12 @@ public class Schedule {
 		nursesNotChecked = new ArrayList<Integer>();
 		for (int i = 0; i < 16; i++)
 			nursesNotChecked.add(new Integer(i));
-		
+
 		return nursesNotChecked;
+	}
+	
+	public ArrayList<Integer> clearNursesToCheckFirst(ArrayList<Integer> list){
+		return new ArrayList<Integer>();
 	}
 
 	public void clearNurseDataDaily(int day) {
@@ -165,8 +182,11 @@ public class Schedule {
 			int[] nurseDay = getNurseDayScheduleFromDay(i, day - 1);
 
 			// jeœli nie pracowa³a wczoraj
-			if (!checkIfNurseWorkedNightShift(nurseDay))
+			if (!checkIfNurseWorkedNightShift(nurseDay)){
+				nurse.lastConsecutiveNighShiftsSeries = nurse.consecutiveNightShifts;
 				nurse.consecutiveNightShifts = 0;
+			}
+				
 
 			if (checkIfNurseWorked(nurseDay))
 				nurse.workedYesterday = true;
@@ -178,15 +198,46 @@ public class Schedule {
 		}
 	}
 
-	public ArrayList<Integer> copyList(ArrayList<Integer>list){
-		ArrayList<Integer> listToReturn= new ArrayList<Integer>();
-		for(Integer i : list){
+	public ArrayList<Integer> copyList(ArrayList<Integer> list) {
+		ArrayList<Integer> listToReturn = new ArrayList<Integer>();
+		for (Integer i : list) {
 			listToReturn.add(i);
 		}
-		
+
 		return listToReturn;
 	}
-	
+
+	public void testIndividual() throws Exception {
+		for (int shift = 0; shift < 35 * 4; shift++) {
+
+			// is new week?
+			if (shift % 28 == 0) {
+				clearNurseDataWeekly();
+			}
+
+			// is new day?
+			if (shift % 4 == 0)
+				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
+
+			for (int nurseId = 0; nurseId < 16; nurseId++) {
+				if (schedule[nurseId][shift] == 1) {
+					schedule[nurseId][shift] = 0;
+					if(shift == 34 && nurseId == 15)
+						System.out.println("");
+					if (constraint.checkSchedule(nurseId, shift, schedule))
+						setSchedule(nurseId, shift);
+					
+					else
+						throw new Exception("Nurse: " + nurseId + " shift: " + shift);
+				}
+
+
+			}
+
+		}
+
+	}
+
 	// tworzy randomowego reprezentanta (randomowy harmonogram)
 	public void generateIndividual() throws Exception {
 		int failedAttemptsLvl1 = 0, failedAttemptsLvl2 = 0;
@@ -195,15 +246,17 @@ public class Schedule {
 		ArrayList<Integer> nursesNotChecked = null;
 		ArrayList<Integer> nursesOnSaturday = null;
 		ArrayList<Integer> nursesOnSaturdayCopy = new ArrayList<Integer>();
+		ArrayList<Integer> nursesToCheckFirst = new ArrayList<Integer>();
+		
 
 		int nurseId = 0;
 
 		for (int shift = 0; shift < 35 * 4; shift++) {
 			nursesNotChecked = fillNursesNotCheckedList(nursesNotChecked);
 			nursesOnSaturday = copyList(nursesOnSaturdayCopy);
-			
+
 			// is new week?
-			if (shift % 28 == 0){
+			if (shift % 28 == 0) {
 				clearNurseDataWeekly();
 				nursesOnSaturday = new ArrayList<Integer>();
 				nursesOnSaturdayCopy = new ArrayList<Integer>();
@@ -217,35 +270,53 @@ public class Schedule {
 			nursesScheduledForTheDay = 0;
 
 			while (true) {
-				if(NurseCalculations.checkIfItIsSunday(shift) && nursesOnSaturday.size() > 0){
-					//jeœli to niedziela to najpierw spróbuj przydzieliæ tê z soboty
+
+				if (NurseCalculations.checkIfItIsSunday(shift) && nursesOnSaturday.size() > 0) {
+					// jeœli to niedziela to najpierw spróbuj przydzieliæ tê z
+					// soboty
 					nurseId = NurseCalculations.randomNurseDraw(nursesOnSaturday);
 					nursesOnSaturday.remove(new Integer(nurseId));
-					
 				}
-
-				else{
+				else {
 					nurseId = NurseCalculations.randomNurseDraw(nursesNotChecked);
+				}
+				
+				//jeœli to zmiana nocna to uwa¿aj na soft constraint 3
+				if(NurseCalculations.isNightShift(shift)){
+					if(nursesToCheckFirst.size() > 0){
+						nurseId = NurseCalculations.randomNurseDraw(nursesToCheckFirst);
+						nursesToCheckFirst.remove(new Integer(nurseId));
+					}
+
 				}
 
 				nursesNotChecked.remove(new Integer(nurseId));
 				if (constraint.checkSchedule(nurseId, shift, schedule)) {
-					if(NurseCalculations.checkIfItIsSaturday(shift)){
+					if (NurseCalculations.checkIfItIsSaturday(shift)) {
 						nursesOnSaturday.add(new Integer(nurseId));
 						nursesOnSaturdayCopy.add(new Integer(nurseId));
 					}
 					setSchedule(nurseId, shift);
+					//TODO
+					Nurse nurse = NurseManager.getNurse(nurseId);
+					//jeœli ma aktualnie jedn¹ zmianê nocn¹, to wpisz j¹ do listy pielêgniarek do sprawdzenia
+					//¿eby unikn¹æ pojedynczych zmian nocnych (soft constraint 3)
+					if(nurse.consecutiveNightShifts == 1){
+						nursesToCheckFirst.add(new Integer(nurseId));
+					}
+					
 					nursesScheduledForTheDay++;
 					failedAttemptsLvl1 = 0;
 
 					// uda³o siê przydzieliæ do tej zmiany tyle ile potrzeba
 					if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
-						
-
-/*						//System.out.println("Drukuje nowy harmonogram");
-						ExportScheduleToHtml b1 = new ExportScheduleToHtml(getAllSchedule());
-						b1.exportScheduleToHtml("in progress");*/
+						/*
+						 * //System.out.println("Drukuje nowy harmonogram");
+						 * ExportScheduleToHtml b1 = new
+						 * ExportScheduleToHtml(getAllSchedule());
+						 * b1.exportScheduleToHtml("in progress");
+						 */
 
 						// przechodzimy do nastêpnej zmiany
 						break;
@@ -264,10 +335,10 @@ public class Schedule {
 							b1.exportBestResult(shift);
 						}
 
-						System.exit(0);
+						throw new Exception("Program failed to generate individual this time at shift: " + shift +". Try again!");
 					}
 					failedAttemptsLvl1++;
-					
+
 					if (failedAttemptsLvl1 > 100000)
 						System.exit(0);
 

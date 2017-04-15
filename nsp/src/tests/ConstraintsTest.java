@@ -183,7 +183,6 @@ public class ConstraintsTest {
 	}
 	
 	@Test
-	//TODO
 	public void consecutiveNightShiftsRestTest2() {
 
 		// 2 consecutive night shifts
@@ -226,6 +225,26 @@ public class ConstraintsTest {
 		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
 		
 		constraint.checkSchedule(13, 120, schedule.getAllSchedule());
+		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
+	}
+	
+	
+	@Test
+	public void consecutiveNightShiftsRestTest3() {
+
+		// 2 consecutive night shifts
+		schedule.setSchedule(9, 11);
+		schedule.setSchedule(9, 15);
+
+		for(int i = 16; i<24;i++){
+			// za wczeœnie
+			constraint.checkSchedule(9, i, schedule.getAllSchedule());
+			assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+		}
+		
+
+		// dopiero ok
+		constraint.checkSchedule(9, 24, schedule.getAllSchedule());
 		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
 	}
 
