@@ -75,15 +75,15 @@ public class SoftConstraintsTest {
 	public void consecutiveNightShiftTest(){
 		
 		//1 zmiana nocna
-		schedule.setSchedule(13, 3);
+		schedule.setSchedule(5, 3);
 		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(4));
 
 		//2 zmiana nocna
-		schedule.setSchedule(13, 7);
+		schedule.setSchedule(5, 7);
 		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(8));
 		
 		
-		constraint.checkSchedule(13, 8, schedule.getAllSchedule());
+		constraint.checkSchedule(5, 8, schedule.getAllSchedule());
 		assertEquals(0, constraint.consecutiveNightShift());
 	}
 	
@@ -91,14 +91,14 @@ public class SoftConstraintsTest {
 	public void consecutiveNightShiftTest2(){
 		
 		//1 zmiana nocna
-		schedule.setSchedule(13, 3);
+		schedule.setSchedule(5, 3);
 		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(4));
 
 		//zmiana  
-		schedule.setSchedule(13, 8);
+		schedule.setSchedule(5, 8);
 		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(9));
 
-		constraint.checkSchedule(13, 9, schedule.getAllSchedule());
+		constraint.checkSchedule(5, 8, schedule.getAllSchedule());
 		assertEquals(1000, constraint.consecutiveNightShift());
 	}
 	
@@ -107,13 +107,13 @@ public class SoftConstraintsTest {
 	public void consecutiveNightShiftTest3(){
 		
 		//1 zmiana nocna
-		schedule.setSchedule(13, 3);
+		schedule.setSchedule(5, 3);
 		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(4));
 
 		//pielêgniarka nic nie robi w tym dniu
 		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(8));
 
-		constraint.checkSchedule(13, 8, schedule.getAllSchedule());
+		constraint.checkSchedule(5, 8, schedule.getAllSchedule());
 		assertEquals(1000, constraint.consecutiveNightShift());
 	}
 	

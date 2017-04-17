@@ -208,24 +208,44 @@ public class Schedule {
 	}
 
 	public void testIndividual() throws Exception {
+		int nursesScheduledForTheDay = 0;
+		
 		for (int shift = 0; shift < 35 * 4; shift++) {
-
 			// is new week?
 			if (shift % 28 == 0) {
+				
 				clearNurseDataWeekly();
 			}
-
 			// is new day?
-			if (shift % 4 == 0)
+			if (shift % 4 == 0){	
+				nursesScheduledForTheDay = 0;
+				constraint.checkSoftConstraints();
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
-
+			}
+				
 			for (int nurseId = 0; nurseId < 16; nurseId++) {
+				
 				if (schedule[nurseId][shift] == 1) {
 					schedule[nurseId][shift] = 0;
 					if(shift == 34 && nurseId == 15)
 						System.out.println("");
-					if (constraint.checkSchedule(nurseId, shift, schedule))
+					if (constraint.checkSchedule(nurseId, shift, schedule)){
 						setSchedule(nurseId, shift);
+						nursesScheduledForTheDay++;
+						// uda³o siê przydzieliæ do tej zmiany tyle ile potrzeba
+						if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
+
+							
+							if(shift % 28 == 0 ){
+								constraint.checkSoftConstraints();
+							}
+
+
+							// przechodzimy do nastêpnej zmiany
+							break;
+						}
+					}
+						
 					
 					else
 						throw new Exception("Nurse: " + nurseId + " shift: " + shift);
@@ -239,7 +259,7 @@ public class Schedule {
 	}
 
 	// tworzy randomowego reprezentanta (randomowy harmonogram)
-	public void generateIndividual() throws Exception {
+	public int generateIndividual() throws Exception {
 		int failedAttemptsLvl1 = 0, failedAttemptsLvl2 = 0;
 		int nursesScheduledForTheDay = 0;
 		int lastScheduledNurse = 0;
@@ -263,8 +283,11 @@ public class Schedule {
 			}
 
 			// is new day?
-			if (shift % 4 == 0)
+			if (shift % 4 == 0){
+				constraint.checkSoftConstraints();
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
+			}
+				
 
 			lastScheduledNurse = 0;
 			nursesScheduledForTheDay = 0;
@@ -278,7 +301,12 @@ public class Schedule {
 					nursesOnSaturday.remove(new Integer(nurseId));
 				}
 				else {
-					nurseId = NurseCalculations.randomNurseDraw(nursesNotChecked);
+					if(nursesNotChecked.size() > 0){
+						nurseId = NurseCalculations.randomNurseDraw(nursesNotChecked);
+					}
+					else
+						return 0;
+
 				}
 				
 				//jeœli to zmiana nocna to uwa¿aj na soft constraint 3
@@ -289,6 +317,8 @@ public class Schedule {
 					}
 
 				}
+				
+				
 
 				nursesNotChecked.remove(new Integer(nurseId));
 				if (constraint.checkSchedule(nurseId, shift, schedule)) {
@@ -311,6 +341,11 @@ public class Schedule {
 					// uda³o siê przydzieliæ do tej zmiany tyle ile potrzeba
 					if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
+						
+						if(shift % 28 == 0 ){
+							constraint.checkSoftConstraints();
+						}
+							
 						/*
 						 * //System.out.println("Drukuje nowy harmonogram");
 						 * ExportScheduleToHtml b1 = new
@@ -327,15 +362,16 @@ public class Schedule {
 				else {
 
 					if (nursesNotChecked.size() == 0) {
-						ExportScheduleToHtml b1 = new ExportScheduleToHtml(getAllSchedule());
+/*						ExportScheduleToHtml b1 = new ExportScheduleToHtml(getAllSchedule());
 
 						int currentBest = b1.importBestResult();
 						if (shift > currentBest) {
 							b1.exportScheduleToHtml("results");
 							b1.exportBestResult(shift);
-						}
+						}*/
 
-						throw new Exception("Program failed to generate individual this time at shift: " + shift +". Try again!");
+						//throw new Exception("Program failed to generate individual this time at shift: " + shift +". Try again!");
+						return 0;
 					}
 					failedAttemptsLvl1++;
 
@@ -348,6 +384,7 @@ public class Schedule {
 
 		}
 
+		return 1;
 	}
 
 }

@@ -1,15 +1,21 @@
 package tests;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import dataflow.ExportScheduleToHtml;
 import dataflow.ImportSchedule;
 import nsp.NurseManager;
 import nsp.Schedule;
+import program.GetSatisfyingResult;
 
 
 public class ImortFromFileAndCheckTest {
 
+	int penalty = 0;
+		
 	@Test
 	public void testSchedule() throws Exception {
 		Schedule schedule = new Schedule();
@@ -25,8 +31,13 @@ public class ImortFromFileAndCheckTest {
 		schedule.testIndividual();	
 		
 		System.out.println("Imported schedule looks fine to me!");
-		System.out.println("Penalty: " + schedule.getPenalty());
-
+		this.penalty = schedule.getPenalty();
+		System.out.println("Penalty: " + this.penalty);
+		
+		ExportScheduleToHtml export = new ExportScheduleToHtml(null);
+		int expected = export.importResult();
+		
+		assertEquals(expected, this.penalty);
 	}
 
 }

@@ -10,9 +10,9 @@ public class NurseManager {
 			allNurses[i] = new Nurse(i, 36);
 		
 		allNurses[12] = new Nurse(12, 32);		
-		allNurses[13] = new Nurse(13, 30);
-		allNurses[14] = new Nurse(14, 30);
-		allNurses[15] = new Nurse(15, 30);
+		allNurses[13] = new Nurse(13, 20);
+		allNurses[14] = new Nurse(14, 20);
+		allNurses[15] = new Nurse(15, 20);
 
 	}
 	

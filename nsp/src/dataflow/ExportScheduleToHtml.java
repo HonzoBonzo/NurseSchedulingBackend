@@ -14,14 +14,14 @@ public class ExportScheduleToHtml {
 		this.schedule = schedule;
 	}
 	
-	public int importBestResult() throws FileNotFoundException{
-		Scanner scanner = new Scanner(new File("bestResult.txt"));
+	public int importResult() throws FileNotFoundException{
+		Scanner scanner = new Scanner(new File("result.txt"));
 		return scanner.nextInt();
 	}
 	
-	public void exportBestResult(int bestResult) throws FileNotFoundException, UnsupportedEncodingException{
-		PrintWriter writer = new PrintWriter("bestResult.txt", "UTF-8");
-		writer.print(bestResult);
+	public void exportResult(int result) throws FileNotFoundException, UnsupportedEncodingException{
+		PrintWriter writer = new PrintWriter("result.txt", "UTF-8");
+		writer.print(result);
 		writer.close();
 	}
 	

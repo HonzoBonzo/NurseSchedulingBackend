@@ -105,11 +105,20 @@ public class Constraints {
 		 * if (h1 && h2 && h3 && h4 && h5 && h6 && h7 && h8) return true;
 		 */
 
-		// SOFT CONSTRAINT CHECK
-		this.penalty += noShiftsOrAtLeastTwoShiftsOnWeekends();
-		this.penalty += consecutiveNightShift();
+		
 
 		return true;
+	}
+	
+	public void checkSoftConstraints(){
+		// SOFT CONSTRAINT CHECK
+		for(int i = 0; i< 16; i++){
+			this.nurseId = i;
+			this.nurse = NurseManager.getNurse(i);
+			this.penalty += noShiftsOrAtLeastTwoShiftsOnWeekends();
+			this.penalty += consecutiveNightShift();
+		}
+		
 	}
 
 	/*
@@ -311,16 +320,6 @@ public class Constraints {
 	 * For the period of Friday 22:00 to Monday 0:00 a nurse should have either
 	 * no shifts or at least 2 shifts (‘Complete Weekend’).
 	 */
-	/*
-	 * public int noShiftsOrAtLeastTwoShiftsOnWeekends() {
-	 * 
-	 * //tylko w niedziele mozesz ocenic czy bylo zlamane w tym tygodniu czy nie
-	 * if(NurseCalculations.checkIfItIsSunday(shift)) if (nurse.softConstraint1
-	 * == 1) { System.out.println("SC: 1. Nurse: " + nurseId + " shift: " +
-	 * shift); return 1000; }
-	 * 
-	 * return 0; }
-	 */
 
 	public int noShiftsOrAtLeastTwoShiftsOnWeekends() {
 
@@ -350,13 +349,24 @@ public class Constraints {
 	 * another series.
 	 */
 
-	public int consecutiveNightShift() {
-		if (nurse.lastConsecutiveNighShiftsSeries == 1) {
-			System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
-			return 1000;
+	public int consecutiveNightShift() {	
+		if(nurse.hoursPerWeek >= 30){
+			if (nurse.lastConsecutiveNighShiftsSeries == 1) {
+				System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
+				return 1000;
+			}
 		}
 
 		return 0;
 	}
+	
+	
+	/*
+	 * For	employees	with	availability	of	30-48	hours	per	
+		week,	within	one	week	the	number	of	shifts	is	within	
+		the	range	4- 5.
+	 */
 
+	
+	
 }
