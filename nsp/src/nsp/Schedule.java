@@ -267,6 +267,9 @@ public class Schedule {
 		ArrayList<Integer> nursesOnSaturday = null;
 		ArrayList<Integer> nursesOnSaturdayCopy = new ArrayList<Integer>();
 		ArrayList<Integer> nursesToCheckFirst = new ArrayList<Integer>();
+		nursesToCheckFirst.add(new Integer(13));
+		nursesToCheckFirst.add(new Integer(14));
+		nursesToCheckFirst.add(new Integer(15));
 		
 
 		int nurseId = 0;
@@ -300,6 +303,9 @@ public class Schedule {
 					nurseId = NurseCalculations.randomNurseDraw(nursesOnSaturday);
 					nursesOnSaturday.remove(new Integer(nurseId));
 				}
+				
+				//tutaj wpadaj¹ zmiany dzienne z dni powszednich
+				//nale¿y unikaæ pielêgniarek part-time-job
 				else {
 					if(nursesNotChecked.size() > 0){
 						nurseId = NurseCalculations.randomNurseDraw(nursesNotChecked);
@@ -310,13 +316,15 @@ public class Schedule {
 				}
 				
 				//jeœli to zmiana nocna to uwa¿aj na soft constraint 3
-				if(NurseCalculations.isNightShift(shift)){
+				if(NurseCalculations.isNightShift(shift)){	
 					if(nursesToCheckFirst.size() > 0){
 						nurseId = NurseCalculations.randomNurseDraw(nursesToCheckFirst);
 						nursesToCheckFirst.remove(new Integer(nurseId));
 					}
-
 				}
+				
+
+				
 				
 				
 
@@ -332,8 +340,12 @@ public class Schedule {
 					//jeœli ma aktualnie jedn¹ zmianê nocn¹, to wpisz j¹ do listy pielêgniarek do sprawdzenia
 					//¿eby unikn¹æ pojedynczych zmian nocnych (soft constraint 3)
 					if(nurse.consecutiveNightShifts == 1){
-						nursesToCheckFirst.add(new Integer(nurseId));
+						if(nurse.hoursPerWeek > 30){
+							nursesToCheckFirst.add(new Integer(nurseId));
+						}
 					}
+					
+					
 					
 					nursesScheduledForTheDay++;
 					failedAttemptsLvl1 = 0;
@@ -341,19 +353,9 @@ public class Schedule {
 					// uda³o siê przydzieliæ do tej zmiany tyle ile potrzeba
 					if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
-						
 						if(shift % 28 == 0 ){
 							constraint.checkSoftConstraints();
 						}
-							
-						/*
-						 * //System.out.println("Drukuje nowy harmonogram");
-						 * ExportScheduleToHtml b1 = new
-						 * ExportScheduleToHtml(getAllSchedule());
-						 * b1.exportScheduleToHtml("in progress");
-						 */
-
-						// przechodzimy do nastêpnej zmiany
 						break;
 					}
 				}
@@ -362,21 +364,9 @@ public class Schedule {
 				else {
 
 					if (nursesNotChecked.size() == 0) {
-/*						ExportScheduleToHtml b1 = new ExportScheduleToHtml(getAllSchedule());
-
-						int currentBest = b1.importBestResult();
-						if (shift > currentBest) {
-							b1.exportScheduleToHtml("results");
-							b1.exportBestResult(shift);
-						}*/
-
-						//throw new Exception("Program failed to generate individual this time at shift: " + shift +". Try again!");
 						return 0;
 					}
-					failedAttemptsLvl1++;
 
-					if (failedAttemptsLvl1 > 100000)
-						System.exit(0);
 
 				}
 
