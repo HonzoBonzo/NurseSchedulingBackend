@@ -114,6 +114,7 @@
     <ClCompile Include="HardConstraint.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Randoms.cpp" />
+    <ClCompile Include="Result.cpp" />
     <ClCompile Include="SoftConstraint.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +122,8 @@
     <ClInclude Include="ACOException.h" />
     <ClInclude Include="HardConstraint.h" />
     <ClInclude Include="HardConstraintException.h" />
+    <ClInclude Include="Result.h" />
+    <ClInclude Include="ShiftIndex.h" />
     <ClInclude Include="SoftConstraint.h" />
     <ClInclude Include="SoftConstraintException.h" />
   </ItemGroup>

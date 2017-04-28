@@ -2,21 +2,15 @@
 #define HARDCONSTRAINT_H_
 
 #include "HardConstraintException.h"
-
-#define EARLY	0
-#define DAY		1
-#define LATE	2
-#define NIGHT	3
-#define REST	4
+#include "ShiftIndex.h"
 
 class HardConstraint {
 public:
+
 	HardConstraint() = default;
 	HardConstraint(char** solution, int no_employees, int no_days) : _solution{ solution }, _no_employees{ no_employees }, _no_weeks{ no_days / 7 }, _max_no_days{no_days}, _no_days { no_days }, _no_shifts{ 5 } {}
 
 	inline void set_days(int no_days) { _no_days = no_days; _no_weeks = _no_days / 7; }
-
-	bool daily_demand_for_shifts(int);
 
 	/* 1. Cover needs to be fulfilled (i.e. no shifts must be left unassigned). */
 	bool cover_fulfilled(int);
@@ -54,30 +48,9 @@ public:
 
 private:
 
-	inline int _j_d(int j) { return (j / 5); }
-	inline int _j_w(int j) { return ((j / 5) / 7); }
-
-	inline int _j_es(int j) { return 5 * (j / 5); }
-	inline int _j_ds(int j) { return 5 * (j / 5) + DAY; }
-	inline int _j_ls(int j) { return 5 * (j / 5) + LATE; }
-	inline int _j_ns(int j) { return 5 * (j / 5) + NIGHT; }
-	inline int _j_rs(int j) { return 5 * (j / 5) + REST; }
-
-	inline int _d_j(int d) { return 5 * d; }
-	inline int _w_j(int w) { return w * 5 * 7; }
-
-	inline int _es_j(int s) { return 5 * s; }
-	inline int _ds_j(int s) { return 5 * s + DAY; }
-	inline int _ls_j(int s) { return 5 * s + LATE; }
-	inline int _ns_j(int s) { return 5 * s + NIGHT; }
-	inline int _rs_j(int s) { return 5 * s + REST; }
-
-	inline int _sat_j(int sat) { return 5 * (7 * sat + 5); }
-
-	//inline int _ws_j(int ws) { return ws + (ws % 5 == 4) - (ws - 1) / 5; }
-
-	int _no_employees, _no_weeks, _no_days, _max_no_days, const _no_shifts;
+	int _no_employees, _no_weeks, _no_days, _max_no_days, _no_shifts;
 	char **_solution;
+
 };
 
 
