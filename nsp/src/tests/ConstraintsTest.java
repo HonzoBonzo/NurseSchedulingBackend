@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import nsp.Constraints;
 import nsp.Nurse;
+import nsp.NurseCalculations;
 import nsp.NurseManager;
 import nsp.Schedule;
 
@@ -165,15 +166,15 @@ public class ConstraintsTest {
 		// 2 consecutive night shifts
 		schedule.setSchedule(5, 3);
 		schedule.setSchedule(5, 7);
-		// koñczy prace w œrodê o 7:00 - moze zaczac pracowaæ najwczesniej w
-		// pi¹tek od 1:00
-		// czyli de fakto od porannej zmiany w pi¹tek
+		// koï¿½czy prace w ï¿½rodï¿½ o 7:00 - moze zaczac pracowaï¿½ najwczesniej w
+		// piï¿½tek od 1:00
+		// czyli de fakto od porannej zmiany w piï¿½tek
 
-		// za wczeœnie
+		// za wczeï¿½nie
 		constraint.checkSchedule(5, 10, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
 
-		// ci¹gle za wczeœnie
+		// ciï¿½gle za wczeï¿½nie
 		constraint.checkSchedule(5, 13, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
 
@@ -188,27 +189,29 @@ public class ConstraintsTest {
 		// 2 consecutive night shifts
 		schedule.setSchedule(13, 35);
 		schedule.setSchedule(13, 39);
-		// koñczy prace w czwartek o 7:00 - moze zaczac pracowaæ najwczesniej w
+		// koï¿½czy prace w czwartek o 7:00 - moze zaczac pracowaï¿½ najwczesniej w
 		// sobote od 1:00
-		// czyli de fakto od porannej zmiany w sobotê
+		// czyli de fakto od porannej zmiany w sobotï¿½
 
-		// za wczeœnie
+		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(40));
+		// zmiana nocna - bylo by ok
 		constraint.checkSchedule(13, 43, schedule.getAllSchedule());
-		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
 
-		// ci¹gle za wczeœnie
+		schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(44));
+		// na inna zmiane za wczesnie
 		constraint.checkSchedule(13, 44, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
 
-		// ci¹gle za wczeœnie
+		// ciï¿½gle za wczeï¿½nie
 		constraint.checkSchedule(13, 45, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
 		
-		// ci¹gle za wczeœnie
+		// ciï¿½gle za wczeï¿½nie
 		constraint.checkSchedule(13, 46, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
 		
-		// ci¹gle za wczeœnie
+		// zmiana nocna, ale nie w serii wiec jest nie ok
 		constraint.checkSchedule(13, 47, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
 		
@@ -217,7 +220,7 @@ public class ConstraintsTest {
 		constraint.checkSchedule(13, 48, schedule.getAllSchedule());
 		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
 		
-		//wszystko póniej tez ok
+		//wszystko pï¿½niej tez ok
 		constraint.checkSchedule(13, 49, schedule.getAllSchedule());
 		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
 		
@@ -236,13 +239,25 @@ public class ConstraintsTest {
 		schedule.setSchedule(9, 11);
 		schedule.setSchedule(9, 15);
 
-		for(int i = 16; i<24;i++){
-			// za wczeœnie
+		for(int i = 16; i<24;i++){	
+			if (i % 4 == 0){
+				schedule.clearNurseDataDaily(NurseCalculations.convertShiftToDay(i));
+			}
+			
 			constraint.checkSchedule(9, i, schedule.getAllSchedule());
-			assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+			
+			//to by byla zmiana nocna w serii wiec ok
+			if(i == 19){
+				assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
+			}
+			
+			else{
+				// za wczeï¿½nie
+				assertEquals(false, constraint.enoughRestAfterConsecutiveNightShifts());
+			}
+
 		}
 		
-
 		// dopiero ok
 		constraint.checkSchedule(9, 24, schedule.getAllSchedule());
 		assertEquals(true, constraint.enoughRestAfterConsecutiveNightShifts());
@@ -258,11 +273,11 @@ public class ConstraintsTest {
 		// zmiana late - konczy o 23:00
 		schedule.setSchedule(5, 2);
 
-		// za wczeœnie
+		// za wczeï¿½nie
 		constraint.checkSchedule(5, 4, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestIn24Hours());
 
-		// za wczeœnie
+		// za wczeï¿½nie
 		constraint.checkSchedule(5, 5, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestIn24Hours());
 
@@ -273,15 +288,15 @@ public class ConstraintsTest {
 		// zmiana night - konczy o 7:00
 		schedule.setSchedule(6, 3);
 
-		// za wczeœnie
+		// za wczeï¿½nie
 		constraint.checkSchedule(6, 4, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestIn24Hours());
 
-		// za wczeœnie
+		// za wczeï¿½nie
 		constraint.checkSchedule(6, 5, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestIn24Hours());
 
-		// za wczeœnie
+		// za wczeï¿½nie
 		constraint.checkSchedule(6, 6, schedule.getAllSchedule());
 		assertEquals(false, constraint.enoughRestIn24Hours());
 
@@ -300,12 +315,12 @@ public class ConstraintsTest {
 	@Test
 	public void nightShiftRest() {
 		//troche dziwne dla mnie ograniczenie
-		//bo zmiana nocna koñczy siê o 7 rano
-		//14 godzin odoczynku pozwoli³o by pracowaæ dopiero od godziny 21
+		//bo zmiana nocna koï¿½czy siï¿½ o 7 rano
+		//14 godzin odoczynku pozwoliï¿½o by pracowaï¿½ dopiero od godziny 21
 		//czyli de facto kolejnej zmiany nocnej o 23
 		
-		//tak samo ogranicza ju¿ przecie¿ minimum 11 godzin odpoczynku w ci¹gu 24h
-		//bo po zmianie nocnej mo¿na pracowaæ dopiero od godziny 18 czyli te¿ de facto
+		//tak samo ogranicza juï¿½ przecieï¿½ minimum 11 godzin odpoczynku w ciï¿½gu 24h
+		//bo po zmianie nocnej moï¿½na pracowaï¿½ dopiero od godziny 18 czyli teï¿½ de facto
 		//kolejnej zmiany nocnej o 23
 		assertEquals(true, true);
 	}
@@ -325,7 +340,7 @@ public class ConstraintsTest {
 		schedule.setSchedule(5, 39);
 		
 		
-		//ju¿ za du¿o
+		//juï¿½ za duï¿½o
 		constraint.checkSchedule(5, 43, schedule.getAllSchedule());
 		assertEquals(false, constraint.consecutiveNightShiftsConstraint());
 	}

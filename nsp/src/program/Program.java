@@ -17,7 +17,7 @@ public class Program {
 		long lStartTime =System.nanoTime();
 
 		
-		while(!getResult.generateResult(7000)){
+		while(!getResult.generateResult(1000)){
 			System.out.println("---------------");
 		}
 		long lEndTime = System.nanoTime();
@@ -26,6 +26,7 @@ public class Program {
 		ExportScheduleToHtml export = new ExportScheduleToHtml(schedule.getAllSchedule());
 		export.exportScheduleToHtml("schedule-" + schedule.getPenalty() );
 		export.exportScheduleToTxt("tab");
+		export.exportResult(schedule.getPenalty());
 		System.out.println("Time: " + output / 1000000);
 		System.out.println("Penalty: " + schedule.getPenalty());
 		

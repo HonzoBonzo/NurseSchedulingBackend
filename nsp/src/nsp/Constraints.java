@@ -188,6 +188,12 @@ public class Constraints {
 	public boolean enoughRestAfterConsecutiveNightShifts() {
 		int consecutiveNightShifts = nurse.consecutiveNightShifts;
 
+		//jesli to zmiana nocna w serii, to nie trzeba nic sprawdzac
+		if(NurseCalculations.isNightShift(shift) && consecutiveNightShifts > 0){
+			return true;
+		}
+		
+		
 		if (consecutiveNightShifts >= 2 || nurse.notRestedAfterConsecutiveNights == true) {
 			int previousShift = getPreviousShift();
 			int daysBetween = NurseCalculations.convertShiftToDay(shift)
@@ -217,6 +223,9 @@ public class Constraints {
 		nurse.notRestedAfterConsecutiveNights = false;
 		return true;
 	}
+	
+	
+
 
 	/*
 	 * During any period of 24 consecutive hours, at least 11 hours of rest is
@@ -318,16 +327,16 @@ public class Constraints {
 
 	/*
 	 * For the period of Friday 22:00 to Monday 0:00 a nurse should have either
-	 * no shifts or at least 2 shifts (‘Complete Weekend’).
+	 * no shifts or at least 2 shifts (ï¿½Complete Weekendï¿½).
 	 */
 
 	public int noShiftsOrAtLeastTwoShiftsOnWeekends() {
 
 		int shiftsThisWeekTime = 0;
-		// sprawdzane na poprzedni tydzieñ w pierwsz¹ zmianê nastêpnego tygodnia
+		// sprawdzane na poprzedni tydzieï¿½ w pierwszï¿½ zmianï¿½ nastï¿½pnego tygodnia
 		if (shift % 28 == 0 && shift != 0) {
-			// pobierz ostatnie 9 zmian, czyli do zmiany nocnej w pi¹tek
-			// w³¹cznie
+			// pobierz ostatnie 9 zmian, czyli do zmiany nocnej w piï¿½tek
+			// wï¿½ï¿½cznie
 			for (int i = 1; i < 10; i++) {
 				if (schedule[nurseId][shift - i] == 1)
 					shiftsThisWeekTime++;

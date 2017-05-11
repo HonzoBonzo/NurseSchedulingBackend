@@ -181,7 +181,7 @@ public class Schedule {
 
 			int[] nurseDay = getNurseDayScheduleFromDay(i, day - 1);
 
-			// jeœli nie pracowa³a wczoraj
+			// jeï¿½li nie pracowaï¿½a wczoraj
 			if (!checkIfNurseWorkedNightShift(nurseDay)){
 				nurse.lastConsecutiveNighShiftsSeries = nurse.consecutiveNightShifts;
 				nurse.consecutiveNightShifts = 0;
@@ -232,7 +232,7 @@ public class Schedule {
 					if (constraint.checkSchedule(nurseId, shift, schedule)){
 						setSchedule(nurseId, shift);
 						nursesScheduledForTheDay++;
-						// uda³o siê przydzieliæ do tej zmiany tyle ile potrzeba
+						// udaï¿½o siï¿½ przydzieliï¿½ do tej zmiany tyle ile potrzeba
 						if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
 							
@@ -241,7 +241,7 @@ public class Schedule {
 							}
 
 
-							// przechodzimy do nastêpnej zmiany
+							// przechodzimy do nastï¿½pnej zmiany
 							break;
 						}
 					}
@@ -298,14 +298,14 @@ public class Schedule {
 			while (true) {
 
 				if (NurseCalculations.checkIfItIsSunday(shift) && nursesOnSaturday.size() > 0) {
-					// jeœli to niedziela to najpierw spróbuj przydzieliæ tê z
+					// jeï¿½li to niedziela to najpierw sprï¿½buj przydzieliï¿½ tï¿½ z
 					// soboty
 					nurseId = NurseCalculations.randomNurseDraw(nursesOnSaturday);
 					nursesOnSaturday.remove(new Integer(nurseId));
 				}
 				
-				//tutaj wpadaj¹ zmiany dzienne z dni powszednich
-				//nale¿y unikaæ pielêgniarek part-time-job
+				//tutaj wpadajï¿½ zmiany dzienne z dni powszednich
+				//naleï¿½y unikaï¿½ pielï¿½gniarek part-time-job
 				else {
 					if(nursesNotChecked.size() > 0){
 						nurseId = NurseCalculations.randomNurseDraw(nursesNotChecked);
@@ -315,7 +315,7 @@ public class Schedule {
 
 				}
 				
-				//jeœli to zmiana nocna to uwa¿aj na soft constraint 3
+				//jeï¿½li to zmiana nocna to uwaï¿½aj na soft constraint 3
 				if(NurseCalculations.isNightShift(shift)){	
 					if(nursesToCheckFirst.size() > 0){
 						nurseId = NurseCalculations.randomNurseDraw(nursesToCheckFirst);
@@ -337,8 +337,8 @@ public class Schedule {
 					setSchedule(nurseId, shift);
 					//TODO
 					Nurse nurse = NurseManager.getNurse(nurseId);
-					//jeœli ma aktualnie jedn¹ zmianê nocn¹, to wpisz j¹ do listy pielêgniarek do sprawdzenia
-					//¿eby unikn¹æ pojedynczych zmian nocnych (soft constraint 3)
+					//jeï¿½li ma aktualnie jednï¿½ zmianï¿½ nocnï¿½, to wpisz jï¿½ do listy pielï¿½gniarek do sprawdzenia
+					//ï¿½eby uniknï¿½ï¿½ pojedynczych zmian nocnych (soft constraint 3)
 					if(nurse.consecutiveNightShifts == 1){
 						if(nurse.hoursPerWeek > 30){
 							nursesToCheckFirst.add(new Integer(nurseId));
@@ -350,7 +350,7 @@ public class Schedule {
 					nursesScheduledForTheDay++;
 					failedAttemptsLvl1 = 0;
 
-					// uda³o siê przydzieliæ do tej zmiany tyle ile potrzeba
+					// udaï¿½o siï¿½ przydzieliï¿½ do tej zmiany tyle ile potrzeba
 					if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
 						if(shift % 28 == 0 ){
@@ -360,7 +360,7 @@ public class Schedule {
 					}
 				}
 
-				// dla tej pielêgniarki nie mo¿na przydzieliæ tej zmiany
+				// dla tej pielï¿½gniarki nie moï¿½na przydzieliï¿½ tej zmiany
 				else {
 
 					if (nursesNotChecked.size() == 0) {
