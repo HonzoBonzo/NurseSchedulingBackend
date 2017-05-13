@@ -19,6 +19,11 @@ public class Nurse {
 	 boolean thisWeekend;
 	 boolean notRestedAfterConsecutiveNights;
 	public int softConstraint1 = 0;
+	
+	int nightShiftsThisPeriodToSubtract = 0;
+	int nightShiftThisWeekendToSubtract = 0;
+	int workingWeekendsToSubtract = 0;
+	int hoursToSubtract = 0;
 
 
 	public Nurse(int id, int hoursPerWeek){

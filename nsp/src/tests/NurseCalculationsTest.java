@@ -93,6 +93,23 @@ public class NurseCalculationsTest {
 		assertArrayEquals(nursesTab, expectedArray);
 	}
 	
+	
+	@Test
+	public void isFirstWeekTest(){
+		
+		assertEquals(true, NurseCalculations.isFirstWeek(0));
+		assertEquals(true, NurseCalculations.isFirstWeek(1));
+		assertEquals(true, NurseCalculations.isFirstWeek(19));
+		assertEquals(true, NurseCalculations.isFirstWeek(26));
+		assertEquals(true, NurseCalculations.isFirstWeek(27));
+		
+		assertEquals(false, NurseCalculations.isFirstWeek(28));
+		assertEquals(false, NurseCalculations.isFirstWeek(122));
+		assertEquals(false, NurseCalculations.isFirstWeek(166));
+		assertEquals(false, NurseCalculations.isFirstWeek(167));
+		
+		
+	}
 
 	
 }

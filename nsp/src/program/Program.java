@@ -17,8 +17,8 @@ public class Program {
 		long lStartTime =System.nanoTime();
 
 		
-		while(!getResult.generateResult(1000)){
-			System.out.println("---------------");
+		while(!getResult.generateResult(9000)){
+			//System.out.println("---------------");
 		}
 		long lEndTime = System.nanoTime();
 		long output = lEndTime - lStartTime;

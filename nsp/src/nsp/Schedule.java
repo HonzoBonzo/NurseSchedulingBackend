@@ -25,18 +25,18 @@ public class Schedule {
 
 	// konstruuje pusty harmonogram
 	public Schedule() {
-		schedule = new int[16][35 * 4];
+		schedule = new int[16][42 * 4];
 		constraint = new Constraints();
 		for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 35 * 4; j++)
+			for (int j = 0; j < 42 * 4; j++)
 				schedule[i][j] = 0;
 	}
 
 	public void backupScheduleLvl1() {
-		scheduleBackupLvl1 = new int[16][35 * 4];
+		scheduleBackupLvl1 = new int[16][42 * 4];
 		constraint = new Constraints();
 		for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 35 * 4; j++)
+			for (int j = 0; j < 42 * 4; j++)
 				scheduleBackupLvl1[i][j] = this.schedule[i][j];
 	}
 
@@ -45,10 +45,10 @@ public class Schedule {
 	}
 
 	public void backupScheduleLvl2() {
-		scheduleBackupLvl2 = new int[16][35 * 4];
+		scheduleBackupLvl2 = new int[16][42 * 4];
 		constraint = new Constraints();
 		for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 35 * 4; j++)
+			for (int j = 0; j < 42 * 4; j++)
 				scheduleBackupLvl2[i][j] = this.schedule[i][j];
 	}
 
@@ -120,9 +120,16 @@ public class Schedule {
 
 		
 		nurse.totalWorkedTime += 8;
+		if(NurseCalculations.isFirstWeek(shift)){
+			nurse.hoursToSubtract += 8;
+		}
+		
 
 		if (isWeekend) {
 			if (!nurse.thisWeekend) {
+				if(NurseCalculations.isFirstWeek(shift)){
+					nurse.workingWeekendsToSubtract++;
+				}
 				nurse.workingWeekends++;
 				nurse.thisWeekend = true;
 			}
@@ -133,6 +140,10 @@ public class Schedule {
 			nurse.consecutiveNightShifts++;
 			if(nurse.consecutiveNightShifts >= 2)
 				nurse.notRestedAfterConsecutiveNights = true;
+			if(NurseCalculations.isFirstWeek(shift)){
+				nurse.nightShiftsThisPeriodToSubtract++;
+				nurse.nightShiftThisWeekendToSubtract++;
+			}
 			nurse.nightShiftsThisPeriod++;
 			nurse.nightShiftThisWeekend++;
 			// System.out.println("Inkrementuje dla nursa: " + nurseId + "
@@ -198,6 +209,21 @@ public class Schedule {
 		}
 	}
 
+	public void clearNurseDataFromImportedWeek(){
+		Nurse nurse;
+		for (int i = 0; i < 16; i++) {
+			nurse = NurseManager.getNurse(i);
+			//TODO
+			//test this
+			//wyczyscic night shifts z tygodnia -1
+			//wyczyscic working weekends z tygodnia -1
+			nurse.nightShiftsThisPeriod -= nurse.nightShiftsThisPeriodToSubtract;
+			nurse.nightShiftThisWeekend -= nurse.nightShiftThisWeekendToSubtract;
+			nurse.workingWeekends -= nurse.workingWeekendsToSubtract;
+			nurse.totalWorkedTime -= nurse.hoursToSubtract;
+		}
+	}
+	
 	public ArrayList<Integer> copyList(ArrayList<Integer> list) {
 		ArrayList<Integer> listToReturn = new ArrayList<Integer>();
 		for (Integer i : list) {
@@ -210,7 +236,7 @@ public class Schedule {
 	public void testIndividual() throws Exception {
 		int nursesScheduledForTheDay = 0;
 		
-		for (int shift = 0; shift < 35 * 4; shift++) {
+		for (int shift = 0; shift < 42 * 4; shift++) {
 			// is new week?
 			if (shift % 28 == 0) {
 				
@@ -221,6 +247,11 @@ public class Schedule {
 				nursesScheduledForTheDay = 0;
 				constraint.checkSoftConstraints();
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
+			}
+			
+			//clear specific data from week -1
+			if(shift == 140){
+				clearNurseDataFromImportedWeek();
 			}
 				
 			for (int nurseId = 0; nurseId < 16; nurseId++) {
@@ -274,7 +305,7 @@ public class Schedule {
 
 		int nurseId = 0;
 
-		for (int shift = 0; shift < 35 * 4; shift++) {
+		for (int shift = 0; shift < 42 * 4; shift++) {
 			nursesNotChecked = fillNursesNotCheckedList(nursesNotChecked);
 			nursesOnSaturday = copyList(nursesOnSaturdayCopy);
 
@@ -290,7 +321,11 @@ public class Schedule {
 				constraint.checkSoftConstraints();
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
 			}
-				
+			
+			//is a new scheduling period?
+			if(shift % 140 == 0){
+				clearNurseDataFromImportedWeek();
+			}
 
 			lastScheduledNurse = 0;
 			nursesScheduledForTheDay = 0;

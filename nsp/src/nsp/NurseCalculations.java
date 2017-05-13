@@ -6,6 +6,15 @@ import java.util.Random;
 public class NurseCalculations {
 
 	
+	public static boolean isFirstWeek(int shift){
+		int day = NurseCalculations.convertShiftToDay(shift);
+		if(day < 7){
+			return true;
+		}
+		
+		
+		return false;
+	}
 	
 	public static int randomNurseDraw(){
 		Random r = new Random();

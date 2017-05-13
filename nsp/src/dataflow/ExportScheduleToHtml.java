@@ -33,7 +33,7 @@ public class ExportScheduleToHtml {
 		
 		for(int i=0; i<16; i++){
 			writer.println("<tr><th>"+ i +".</th>" );
-			for(int j=0; j<35*4; j++){
+			for(int j=0; j<42*4; j++){
 				if(j%4 == 3){
 					if (schedule[i][j] == 1)
 						writer.println("<th bgcolor=\"#FF0000\">" + schedule[i][j] + "</th>");
@@ -55,7 +55,7 @@ public class ExportScheduleToHtml {
 		}
 		
 		writer.println("<tr><th>  </th>" );
-		for(int j=0; j<35*4; j++){
+		for(int j=0; j<42*4; j++){
 			if(j%4 == 3)
 				writer.println("<th bgcolor=\"#e5e1e0\">" + j + "</th>");	
 			else
@@ -75,7 +75,7 @@ public class ExportScheduleToHtml {
 		for(int i=0; i<16; i++){
 			if(i != 0)
 				writer.println("");
-			for(int j =0; j<140; j++)
+			for(int j =0; j<168; j++)
 				writer.print(schedule[i][j] + " ");
 		}
 		

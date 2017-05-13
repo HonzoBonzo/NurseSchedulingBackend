@@ -45,6 +45,8 @@ public class Constraints {
 		this.schedule = schedule;
 		this.nurse = NurseManager.getNurse(nurseId);
 
+		//TODO
+		//some tests for this would be nice
 		if (nurse.totalWorkedTime + 8 > nurse.hoursPerWeek * 5 + 4) {
 			// System.out.println("\nNurse:" + nurseId + " shift: " + shift +
 			// "constraint: godziny");
@@ -344,7 +346,7 @@ public class Constraints {
 		}
 
 		if (shiftsThisWeekTime == 1) {
-			System.out.println("SC: 1. Nurse: " + nurseId + " shift: " + shift);
+			//System.out.println("SC: 1. Nurse: " + nurseId + " shift: " + shift);
 			return 1000;
 		}
 
@@ -361,7 +363,7 @@ public class Constraints {
 	public int consecutiveNightShift() {	
 		if(nurse.hoursPerWeek >= 30){
 			if (nurse.lastConsecutiveNighShiftsSeries == 1) {
-				System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
+				//System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
 				return 1000;
 			}
 		}
