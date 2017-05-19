@@ -38,8 +38,8 @@ bool HardConstraint::only_one_shift_per_day(int employee) {
 //	  for which they are available for their department by at most 4 hours.
 bool HardConstraint::exceed_hours(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
-	int s = 0, sd = 0, sn = 0, k;
-	int e36 = _no_weeks * 36, e32 = _no_weeks * 32, e20 = _no_weeks * 30;
+	int h = 0, sd = 0, sn = 0, k, s = 0;
+	int e36 = _no_weeks * 36, e32 = _no_weeks * 32, e20 = _no_weeks * 20;
 
 	if (_no_weeks < 1) return true;
 
@@ -47,13 +47,21 @@ bool HardConstraint::exceed_hours(int employee) {
 		k = _es_j(d);
 		sd += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE];
 		sn += ptr[k + NIGHT];
+
+		/*if (d % 7 == 6) {
+			s = sd + sn;
+			if (employee < 12 && !(s >= 4 && s <= 5)) return false;
+			else if (employee == 12 && !(s == 4)) return false;
+			else if (employee > 12 && !(s >= 2 && s <= 4)) return false;
+		}*/
 	}
 
-	s = 8 * sd + 8 * sn;
+	h = 8 * sd + 8 * sn;
+	s = sd + sn;
 
-	if (employee < 12) return (/*(e36 - 8) <= s &&*/ s <= (e36 + 4));
-	else if (employee == 12) return (/*(e32 - 8) <= s &&*/ s <= (e32 + 4));
-	else return (/*(e20 - 8) <= s &&*/ s <= (e20 + 4));
+	if (employee < 12) return (/*(e36 - 4) <= h &&*/ h <= (e36 + 4));
+	else if (employee == 12) return (/*(e32 - 4) <= h &&*/ h <= (e32 + 4));
+	else return ( /*_no_weeks < 4 ||(e20 - 4) <= h &&*/ h <= (e20 + 4));
 	
 	return true;
 }
@@ -92,12 +100,16 @@ bool HardConstraint::weekends_off(int employee) {
 // 6. Following a series of at least 2 consecutive night shifts a 42 hours rest is required.
 bool HardConstraint::rest_hours_after_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
-	int sn = 0, sr = 0;
+	int sn = 0, sr = 0, k1, k2;
 
-	for (int d = 0; d < _no_days; ++d) {
+	for (int d = 0; (d < _no_days && d < _max_no_days - 3); ++d) {
 		sn = ptr[_ns_j(d)] + ptr[_ns_j((d + 1) % _max_no_days)];
-		sr = ptr[_rs_j((d + 2) % _max_no_days)] + ptr[_rs_j((d + 3) % _max_no_days)];
-		if (sn == 2 && sr != 2) return false;
+		k1 = _es_j(d + 2);
+		k2 = _es_j(d + 3);
+		sr = ptr[k1 + EARLY] + ptr[k1 + DAY] + ptr[k1 + LATE] + ptr[k1 + NIGHT]
+			+ ptr[k2 + EARLY] + ptr[k2 + DAY] + ptr[k2 + LATE] + ptr[k2 + NIGHT];
+		//sr = ptr[_rs_j((d + 2) % _max_no_days)] + ptr[_rs_j((d + 3) % _max_no_days)];
+		if (sn == 2 && sr != 0) return false;
 	}
 
 	return true;
@@ -108,7 +120,7 @@ bool HardConstraint::rest_hours_in_any_consecutive_24_period(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0, k1, k2;
 
-	for (int d = 0; d < _no_days; ++d) {
+	for (int d = 0; (d < _no_days && d < _max_no_days - 1); ++d) {
 		k1 = _es_j(d);
 		k2 = _es_j((d + 1) % _max_no_days);
 		s += (ptr[k1 + LATE] == 1 && ptr[k2 + EARLY] == 1)
@@ -139,7 +151,7 @@ bool HardConstraint::consecutive_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0;
 
-	for (int d = 0; d < _no_days; ++d) {
+	for (int d = 0; (d < _no_days && d < _max_no_days - 3); ++d) {
 		s = ptr[_ns_j(d)] + ptr[_ns_j((d + 1) % _max_no_days)] 
 			+ ptr[_ns_j((d + 2) % _max_no_days)] + ptr[_ns_j((d + 3) % _max_no_days)];
 		if (s > 3) return false;
@@ -151,13 +163,27 @@ bool HardConstraint::consecutive_nights(int employee) {
 // 10. The numer of consecutive shifts (workdays) is at most 6.
 bool HardConstraint::consecutive_shifts(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
-	int s = 0;
+	int s = 0, k;
 
 	for (int d = 0; d < _no_days - 6; ++d) {
-		s = ptr[_rs_j(d)] + ptr[_rs_j((d + 1) % _max_no_days)] + ptr[_rs_j((d + 2) % _max_no_days)]
+		/*s = ptr[_rs_j(d)] + ptr[_rs_j((d + 1) % _max_no_days)] + ptr[_rs_j((d + 2) % _max_no_days)]
 			+ ptr[_rs_j((d + 3) % _max_no_days)] + ptr[_rs_j((d + 4) % _max_no_days)]
-			+ ptr[_rs_j((d + 5) % _max_no_days)] + ptr[_rs_j((d + 6) % _max_no_days)];
-		if (s == 0) return false;
+			+ ptr[_rs_j((d + 5) % _max_no_days)] + ptr[_rs_j((d + 6) % _max_no_days)];*/
+		k = _es_j(d);
+		s = ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		k = _es_j(d + 1);
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		k = _es_j(d + 2);
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		k = _es_j(d + 3);
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		k = _es_j(d + 4);
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		k = _es_j(d + 5);
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		k = _es_j(d + 6);
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		if (s > 6) return false;
 	}
 
 	return true;

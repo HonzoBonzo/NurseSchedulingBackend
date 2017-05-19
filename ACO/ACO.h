@@ -32,10 +32,12 @@ public:
 
 	void print_solution();
 	void print_pheromones();
+	void count_hours();
+	void count_weekends();
 
 private:
 
-	void _route(int, int);
+	void _route(int, int, int);
 	char _roulette();
 
 	int _hard_constraint_validation();
@@ -59,6 +61,15 @@ private:
 	int _weekend_allocation_valid();
 	void _update_shifts_per_week();
 	void _update_shifts_per_week(int);
+
+	void _select_correct_shift_distribution();
+	bool _is_correct_shift_distribution();
+
+	/*void _select_ants_for_weekend();
+	bool _correct_weekend_selection();
+	bool _has_weekend_off(int);*/
+
+	void _shuffle_days();
 
 	inline bool _are_connected(int, int);
 	int _shift_r(int, int);
@@ -91,6 +102,7 @@ private:
 	void _initialize_costs();
 	void _initialize_allocations();
 	void _initialize_used_ants();
+	void _initialize_days();
 
 	void _deallocate();
 	void _deallocate_graph();
@@ -122,8 +134,19 @@ private:
 	int *_ants, *_costs, *_allocations, *_used_ants;
 	int _best_total_cost;
 	double **_pheromones, **_delta_pheromones, **_heuristics;
-	char *_graph, **_routes, **_solution, **_connections, _weekends[10][2] = { {1,2},{1,3},{1,4},{1,5},{2,3},{2,4},{2,5},{3,4},{3,5},{4,5} }, _selected_weekends[16], _shifts_per_week[16][5];
+	char *_graph, **_routes, **_solution, **_connections, _selected_weekends[16], _shifts_per_week[16][5];
 	std::pair<char, double> *_probabilities;
+	char _weekends[10][2] = { { 1,2 },{ 1,3 },{ 1,4 },{ 1,5 },{ 2,3 },{ 2,4 },{ 2,5 },{ 3,4 },{ 3,5 },{ 4,5 } };
+
+	int *_shift_distribution[16];
+	
+	int _weekend_count[16];
+	int _weekend_ants[7];
+	int _days[35];
+
+	int d1_12[10][5] = { {5,5,5,4,4}, {5,5,4,5,4}, {5,4,5,5,4}, {4,5,5,5,4}, {4,5,5,4,5}, {4,5,4,5,5}, {4,4,5,5,5}, {5,4,5,4,5}, {5,4,4,5,5}, {5,5,4,4,5} };
+	int d13[1][5] = { {4,4,4,4,4} };
+	int d14_16[10][5] = { {3,3,3,2,2}, {3,3,2,3,2}, {3,2,3,3,2}, {2,3,3,3,2}, {2,3,3,2,3}, {2,3,2,3,3}, {2,2,3,3,3}, {3,2,3,2,3}, {3,2,2,3,3}, {3,3,2,2,3} };
 
 };
 

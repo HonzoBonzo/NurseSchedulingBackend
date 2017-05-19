@@ -6,8 +6,17 @@ int SoftConstraint::f1(int employee) {
 }
 
 int SoftConstraint::f2(int employee) {
+	char *ptr = &_solution[employee][0], *tmp;
+	int count = 0, n;
 
-	return 0;
+	if (employee > 12) return 0;
+
+	for (int d = 0; d < _no_days - 2; ++d) {
+		n = ptr[_ns_j(d)] + ptr[_ns_j(d + 1)] + ptr[_ns_j(d + 2)];
+		if (n == 1) ++count;
+	}
+
+	return count;
 }
 
 int SoftConstraint::f3(int employee) {

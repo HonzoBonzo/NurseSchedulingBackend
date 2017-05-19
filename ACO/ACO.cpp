@@ -27,7 +27,8 @@ ACO::~ACO() {
 
 void ACO::run(int iterations) {
 	clock_t clocks, clocks_it;
-	int h = 0, p, k, r, back, old, s, it;
+	int h = 0, p, k, r, back, old, s, it, wd, subperiod;
+	int too_many_ties_for_day = 0;
 	double td = 0;
 
 	std::cout << "\n Maximum number of iterations: " << iterations << "\n"
@@ -36,12 +37,33 @@ void ACO::run(int iterations) {
 	else std::cout << _maximum_duration << " [s]\n";
 	std::cout << " Best cost level: " << _minimum_cost << "\n\n Run:\n";
 
+	int s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
+	_select_correct_shift_distribution();
+	for (int ant = 0; ant < _no_ants; ++ant) {
+		std::cout << "[" << ant << "] ";
+		for (int week = 0; week < 5; ++week) {
+			std::cout << _shift_distribution[ant][week] << " ";
+		}
+		s1 += _shift_distribution[ant][0];
+		s2 += _shift_distribution[ant][1];
+		s3 += _shift_distribution[ant][2];
+		s4 += _shift_distribution[ant][3];
+		s5 += _shift_distribution[ant][4];
+		std::cout << "\n";
+	}
+	std::cout << s1 << " " << s2 << " " << s3 << " " << s4 << " " << s5 << "\n\n";
+
+	_shuffle_days();
+
 	clocks_it = clock();
 	for (it = 1; it <= iterations; ++it) {
 
 		clocks = clock();
 		s = 0;
 		r = 0;
+		wd = 0;
+		old = 0;
+		subperiod = 0;
 
 		// Clears routes for all ant colony:
 		_clear_routes();
@@ -49,19 +71,22 @@ void ACO::run(int iterations) {
 		// Select pairs of weekends off duty for ants:
 		_select_weekends();
 
+		// Select combination of shifts for each ant:
+		_select_correct_shift_distribution();
+
 		for (int day = 0; day < _no_days; ++day) {
 
 			// Set amount of days to check hard constraints:
-			_hard_constraint->set_days(day + 1);
+			_hard_constraint->set_days(_days[day] + 1);
 
-
-			_clear_shifts_per_week();
+			// Zero tries for current day:
+			too_many_ties_for_day = 0;
 
 			do {
 				p = 0;
 
 				// Clear the allocation for current day:
-				_clear_day(day);
+				_clear_day(_days[day]);
 
 				// Clear previously allocated ants:
 				_clear_used_ants();
@@ -73,45 +98,48 @@ void ACO::run(int iterations) {
 					k = 0;
 					do {
 						// Clear allocation for current shift:
-						_clear_shift(_d_j(day) + shift);
+						_clear_shift(_d_j(_days[day]) + shift);
 
 						for (int ant = 0; ant < _no_ants; ++ant) {
 							// Don't use previously used ants - only one shift per day:
 							if (_used_ants[_ants[ant]] > -1) continue;
 							// Go through graph:
-							_route(_ants[ant], _d_j(day) + shift);
+							_route(_ants[ant], day, _d_j(_days[day]) + shift);
 						}
 						//std::cout << '#';
 
 						// Deadlock break machanism:
-						// Count 100 is experimentally selected.
-						if (++k > 100) {
+						// Count 50 is experimentally selected.
+						if (++k > 30) {
 							p = 1;
 							break;
 						}
 
 						// Check allocation for current shift.
-					} while (_allocation_valid(_d_j(day) + shift) != 0);
+					} while (_allocation_valid(_d_j(_days[day]) + shift) != 0);
 
 					// If deadlock occurred then close day:
 					if (p) break;
 
 					// Signs allocated ants:
-					_update_used_ants(_d_j(day) + shift);
+					_update_used_ants(_d_j(_days[day]) + shift);
 				}
 
 				// If deadlock occurred, then clear 3 last days
 				// and allocate them again:
-				if (p) {
-					_clear_last_days(day, 1);
-					day -= 2;
+				/*if (p && day >= 3) {
+					//std::cout << "a";
+					_clear_last_days(day, 3);
+					old = day;
+					day -= 4;
 					back = day + 1;
 					break;
-				}
+				}*/
 
-				/*if (!p && day != 0 && day % 7 == 0)
+				// 
+				/*if (day >= 3 && (_days[day] % 7 == 4))
 					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_shifts_per_week_valid(ant, day)) {
+						if (!_shifts_per_week_valid(ant, _days[day])) {
 							_clear_last_days(day, 3);
 							old = day;
 							p = 1;
@@ -122,27 +150,28 @@ void ACO::run(int iterations) {
 
 				// If some ant exceed hours in period, then clear at most 2 days 
 				// or clear allocation to last monday and allocate again:
-				if(!p)
+				/*if(!p && day >= 2)
 					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_hard_constraint->exceed_hours(ant)) {
+						if (!_hard_constraint->exceed_hours(_ants[ant])) {
 							int k = 0;
 							do {
 								if(k < 3)
-									_clear_day(day - k);
+									_clear_day(_days[day - k]);
 							} while ((day - k++) % 7 != 0 && k < 3);
 
+							//_clear_last_days(day, 4);
 							p = 1;
 							old = day;
 							day -= k;
 							back = day + 1;
 							break;
-						}
+						}*/
 
 				// If some ant has to many consecutive shifts, then clear last 
 				// day and allocate again:
-				if(!p)
+				if(!p && day >= 1)
 					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_hard_constraint->consecutive_shifts(ant)) {
+						if (!_hard_constraint->consecutive_shifts(_ants[ant])) {
 							_clear_last_days(day, 1);
 							p = 1;
 							old = day;
@@ -151,11 +180,27 @@ void ACO::run(int iterations) {
 							break;
 						}
 
+				// Go back to first day if algorithm can't go to further days:
+				++too_many_ties_for_day;
+				if (too_many_ties_for_day == 20) {
+					_clear_last_days(day, day);
+					p = 1;
+					old = 0;
+					day -= day + 1;
+					back = 0;
+					too_many_ties_for_day = 0;
+
+					// Select combination of shifts for each ant:
+					_select_correct_shift_distribution();
+
+					break;
+				}
+
 				// If some ant has too many nights, 
 				// then clear last day and allocate again:
-				if(!p)
+				if(!p && day >= 1)
 					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_hard_constraint->maximum_number_of_nights(ant)) {
+						if (!_hard_constraint->maximum_number_of_nights(_ants[ant])) {
 							_clear_last_days(day, 1);
 							p = 1;
 							old = day;
@@ -166,10 +211,28 @@ void ACO::run(int iterations) {
 
 				// If any of above hard constrain has failed and 
 				// difference between current day and renew day 
-				if (p) {
-					if (old >= 6 && (old - back) <= 3 && (++s % 10) == 0) {
-						_clear_last_days(day, 2);
-						day -= 3;
+				if (p && day >= 4) {
+					if (old >= 5 && (old - back) <= 3 && (++s % 20) == 0) {
+
+						++subperiod;
+						if (subperiod == 50) {
+							_clear_last_days(day, day);
+							day -= day + 1;
+							s = 0;
+							subperiod = 0;
+							old = 0;
+							back = 0;
+							break;
+						}
+
+						//if(day <= 6)
+						//	_select_weekends();
+
+						if(day < 6)
+							_select_correct_shift_distribution();
+						
+						_clear_last_days(day, 4);
+						day -= 5;
 						s = 0;
 					}
 					old = 0;
@@ -177,7 +240,7 @@ void ACO::run(int iterations) {
 					break;
 				}
 
-				// Print progress bar - the day since the allocation is valid:
+				// Print progress bar - the day until the allocation is valid:
 				std::cout << std::setw(3) << day << " ";
 				for (int d = 0; d < _no_days; ++d) {
 					if (d <= day) std::cout << '#';
@@ -186,17 +249,16 @@ void ACO::run(int iterations) {
 				std::cout << "\r";
 
 				// Now check rest of the hard constraints
-
+				
 			} while ((h = _hard_constraint_validation()) != 0);
 
-			if (p) continue;
-			
-
-			_update_shifts_per_week();
+			//if (p) continue;
 
 			// Unallocated ants should have exactly one shift per day
 			// If ant has no shift assigned, then assign rest shift:
-			_repair_day(day);
+			_repair_day(_days[day]);
+
+			//_update_shifts_per_week();
 		}
 
 		// Update pheromones structure for future better performance:
@@ -213,7 +275,9 @@ void ACO::run(int iterations) {
 			<< "tc: " << _total_cost() << ", "
 			<< "bc: " << _best_total_cost << "          " << std::endl;
 
-		//print_solution();
+		print_solution();
+		count_hours();
+		count_weekends();
 		//print_pheromones();
 
 		// Close if cost is zero - no further optimization needed:
@@ -229,6 +293,80 @@ void ACO::run(int iterations) {
 		      << " Total time:       " << (double(clock() - clocks_it) / double(CLOCKS_PER_SEC)) << " [s]" << std::endl;
 
 	return;
+}
+
+void ACO::_select_correct_shift_distribution() {
+	do {
+		for (int week = 0; week < 5; ++week) {
+			for (int ant = 0; ant < 12; ++ant) {
+				_shift_distribution[ant] = d1_12[rand() % 10];
+			}
+			_shift_distribution[12] = d13[0];
+			for (int ant = 13; ant < _no_ants; ++ant) {
+				_shift_distribution[ant] = d14_16[rand() % 10];
+			}
+		}
+	} while (!_is_correct_shift_distribution());
+}
+
+bool ACO::_is_correct_shift_distribution() {
+	int sum = 0;
+	for (int week = 0; week < 5; ++week) {
+		sum = 0;
+		for (int ant = 0; ant < _no_ants; ++ant) 
+			sum += _shift_distribution[ant][week];
+		// At least 64 shifts per week:
+		if (sum < 64) return false;
+	}
+	return true;
+}
+
+/*void ACO::_select_ants_for_weekend() {
+	// In this set mustn't be any repeat
+	do {
+		for (int i = 0; i < 3; ++i) {
+			_weekend_ants[i] = rand() % 16;
+			for (int j = 0; j < i; ++j)
+				if (_weekend_ants[i] == _weekend_ants[j])
+					--i; // repeat selection for this position
+		}
+	} while (!_correct_weekend_selection());
+}
+
+bool ACO::_correct_weekend_selection() {
+	int k;
+	char* ptr;
+	for (int ant = 0; ant < 3; ++ant) {
+		ptr = _routes[_weekend_ants[ant]];
+		for (int sat = 0; sat < 5; ++sat) {
+			k = _sat_j(sat);
+			// Every ant must have at least 2 weekends off:
+			if ((ptr[k + REST] + ptr[k + 5 + REST]) >= 2)
+				return false;
+		}
+	}
+	return true;
+}
+
+bool ACO::_has_weekend_off(int ant) {
+	for (int i = 0; i < 3; ++i)
+		if (_weekend_ants[i] == ant)
+			return true;
+	return false;
+}*/
+
+void ACO::_shuffle_days() {
+	for (int i = 0; i < 5; ++i) {
+		_days[2 * i] = 7 * i + 5;
+		_days[2 * i + 1] = 7 * i + 6;
+	}
+	int day = 10;
+	for (int i = 0; i < _no_days; ++i) {
+		if (_working_day_d(i)) {
+			_days[day] = i;
+			++day;
+		}
+	}
 }
 
 void ACO::initialize() {
@@ -266,30 +404,33 @@ void ACO::prepare(const char* filename) {
 	std::cout << " tc: " << _total_cost() << ", bc: " << _best_total_cost << std::endl << std::endl;
 }
 
-void ACO::_route(int ant, int shift) {
+void ACO::_route(int ant, int d, int shift) {
 	int count, r, day, week, shift_p;
 
 	day = _j_d(shift);
 	week = _d_w(day) + 1;
 
-	if (_enough_shifts_per_week(ant, day))
-		return;
-
 	// Don't allocate shift for selected pair of weekends:
+	/*_has_weekend_off(ant)*/
+	/*(_weekends[_selected_weekends[ant]][0] == week || _weekends[_selected_weekends[ant]][1] == week)*/
 	if (_weekend_day_d(day) && (_weekends[_selected_weekends[ant]][0] == week || _weekends[_selected_weekends[ant]][1] == week))
 		return;
 
+	// Check amount of shift in current week:
+	if (_enough_shifts_per_week(ant, day))
+		return;
+
 	// Make speacial allocation for first day:
-	if (day == 0) {
+	if (d == 0) {
 		// Set random shift:
 		r = rand() % _no_shifts;
-		if(r == shift)
-			_routes[ant][r] = 1;
+		if(r == (shift % _no_shifts))
+			_routes[ant][_d_j(_days[d]) + r] = 1;
 		return;
 	}
 
 	// Select shift for previous day:
-	shift_p = _shift_r(ant, day-1);
+	shift_p = _shift_r(ant, _days[d - 1]);
 
 	// Calculate probabilities of choosing candidate vertices:
 	count = 0;
@@ -373,19 +514,39 @@ int ACO::_allocation_valid(int shift) {
 }
 
 int ACO::_shifts_per_week_valid(int ant, int day) {
+
 	int week = _d_w(day);
-	int shifts = _shifts_per_week[ant][week];
-	if (ant < 12) return (shifts >= 4 && shifts <= 5);
+	char *ptr = _routes[ant];
+	int shifts = 0, k;
+	for (int d = (7 * _d_w(day)); (d < _no_days && d < (7 * (_d_w(day) + 1))); ++d) {
+		k = _es_j(d);
+		if ((ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT]) == 1)
+			shifts++;
+	}
+
+	//int week = _d_w(day);
+	//int shifts = _shifts_per_week[ant][week];
+	if (ant < 12) return (shifts >= 3 && shifts <= 5);
 	else if (ant == 12) return (shifts == 4);
 	else return (shifts >= 2 && shifts <= 3);
 }
 
 int ACO::_enough_shifts_per_week(int ant, int day) {
 	int week = _d_w(day);
-	int shifts = _shifts_per_week[ant][week];
-	if (ant < 12) return (shifts >= 5);
+	char *ptr = _routes[ant];
+	int shifts = 0, k;
+
+	for (int d = (7 * _d_w(day)); (d < _no_days && d < (7 * (_d_w(day) + 1))); ++d) {
+		k = _es_j(d);
+		if ((ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT]) == 1)
+			shifts++;
+	}
+	return (shifts >= _shift_distribution[ant][week]);
+
+	/*if (ant < 12) return (shifts >= _shift_distribution[ant][week]);
 	else if (ant == 12) return (shifts >= 4);
-	else return (shifts >= 3);
+	else return (shifts >= 3);*/
+	return 0;
 }
 
 int ACO::_cost(int ant) {
@@ -502,7 +663,7 @@ bool ACO::_all_possibilities(char* p) {
 
 void ACO::_update_used_ants(int shift) {
 	for (int ant = 0; ant < _no_ants; ++ant) 
-		if (_routes[ant][shift] == 1)
+		if ((shift % _no_shifts != REST) && _routes[ant][shift] == 1)
 			_used_ants[ant] = shift % _no_shifts;
 }
 
@@ -511,7 +672,10 @@ void ACO::_repair_day(int day) {
 	for (int ant = 0; ant < _no_ants; ++ant) {
 		p = 0;
 		for (int shift = 0; shift < _no_shifts; ++shift) 
-			if (_routes[ant][_d_j(day) + shift] == 1) p = 1;
+			if (_routes[ant][_d_j(day) + shift] == 1) { 
+				p = 1; 
+				break;
+			}
 
 		if (!p) _routes[ant][_rs_j(day)] = 1;
 	}
@@ -540,17 +704,22 @@ int ACO::_weekend_allocation_valid() {
 
 void ACO::_update_shifts_per_week() {
 	for (int ant = 0; ant < _no_ants; ++ant)
-		_update_shifts_per_week(ant);
+		_update_shifts_per_week(_ants[ant]);
 	return;
 }
 
 void ACO::_update_shifts_per_week(int ant) {
 	char *ptr = _routes[ant];
-	int k;
+	int k, s = 0;
 	for (int day = 0; day < _no_days; ++day) {
 		k = _es_j(day);
 		if ((ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT]) == 1)
-			_shifts_per_week[ant][_d_w(day)]++;
+			s++;
+
+		if (day % 7 == 6) {
+			_shifts_per_week[ant][_d_w(day)] = s;
+			s = 0;
+		}
 	}
 	return;
 }
@@ -598,6 +767,7 @@ void ACO::_initialize() {
 	_initialize_costs();
 	_initialize_allocations();
 	_initialize_used_ants();
+	_initialize_days();
 	return;
 }
 
@@ -852,6 +1022,11 @@ void ACO::_deallocate_used_ants() {
 	return;
 }
 
+void ACO::_initialize_days() {
+	for (int day = 0; day < _no_days; ++day)
+		_days[day] = day;
+}
+
 void ACO::_clear_routes() {
 	int whole_shifts = _no_days * _no_shifts;
 	for (int ant = 0; ant < _no_ants; ++ant)
@@ -867,15 +1042,15 @@ void ACO::_clear_route(int ant) {
 }
 
 void ACO::_clear_day(int day) {
-	for (int ant = 0; ant < _no_ants; ++ant) 
-		for (int shift = 0; shift < _no_shifts; ++shift) 
-			_clear_shift(_es_j(day) + shift);
+	//for (int ant = 0; ant < _no_ants; ++ant) 
+	for (int shift = 0; shift < _no_shifts; ++shift) 
+		_clear_shift(_es_j(day) + shift);
 	return;
 }
 
 void ACO::_clear_last_days(int day, int count) {
 	for (int k = 0; k <= count; ++k)
-		_clear_day(day - k);
+		_clear_day(_days[day - k]);
 	return;
 }
 
@@ -921,10 +1096,11 @@ void ACO::print_solution() {
 	using std::endl;
 
 	for (int ant = 0; ant < _no_ants; ++ant) {
-		cout << ant << " |";
-		for (int j = 0; j < (_no_shifts*_no_days); ++j) {
+		cout << (ant < 10 ? " " : "") << ant << " |";
+		for (int j = 0; j < (_no_shifts*21); ++j) {
 			cout << (int)_routes[ant][j];
 			if (j % _no_shifts == (_no_shifts - 1)) cout << "|";
+			if (_j_d(j) % 7 == 6 && j % _no_shifts == REST) cout << "|";
 		}
 		cout << endl;
 	}
@@ -943,5 +1119,51 @@ void ACO::print_pheromones() {
 		}
 		cout << endl;
 	}
+	return;
+}
+
+void ACO::count_hours() {
+	using std::cout;
+	using std::endl;
+
+	int d = 0, k = 0, s = 0, sum = 0;
+	char *ptr;
+	for (int ant = 0; ant < _no_ants; ++ant) {
+		ptr = _routes[ant];
+		sum = 0;
+		cout << "[" << ant << "] ";
+		for (int week = 0; week < 5; ++week) {
+			for (int day = 0; day < 7; ++day) {
+				d = 7 * week + day;
+				k = _es_j(d);
+				s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+			}
+			cout << week + 1 << ": " << s * 8 << ", ";
+			sum += s;
+			s = 0;
+		}
+		cout << sum * 8;
+		cout << "\n";
+	}
+	return;
+}
+
+void ACO::count_weekends() {
+	using std::cout;
+	using std::endl;
+	
+	int w = 0, k;
+	char *ptr;
+	for (int ant = 0; ant < _no_ants; ++ant) {
+		ptr = _routes[ant];
+		w = 0;
+		for (int sat = 0; sat < 5; sat++) {
+			k = _sat_j(sat);
+			if ((ptr[k + REST] + ptr[k + 5 + REST]) == 2)
+				w++;
+		}
+		cout << "[" << ant << "] " << w << endl;
+	}
+
 	return;
 }
