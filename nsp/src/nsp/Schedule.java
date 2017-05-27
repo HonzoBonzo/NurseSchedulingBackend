@@ -18,8 +18,8 @@ public class Schedule {
 	int shiftBackupLvl2;
 
 	Constraints constraint;
-	
-	public int getPenalty(){
+
+	public int getPenalty() {
 		return constraint.penalty;
 	}
 
@@ -32,32 +32,18 @@ public class Schedule {
 				schedule[i][j] = 0;
 	}
 
-	public void backupScheduleLvl1() {
-		scheduleBackupLvl1 = new int[16][42 * 4];
+	public Schedule(int[][] scheduleToCopy) {
+		this.schedule = new int[16][42 * 4];
 		constraint = new Constraints();
 		for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 42 * 4; j++)
-				scheduleBackupLvl1[i][j] = this.schedule[i][j];
-	}
-
-	public void backupNursesLvl1() {
-		NurseManager.backupNursesLvl1();
-	}
-
-	public void backupScheduleLvl2() {
-		scheduleBackupLvl2 = new int[16][42 * 4];
-		constraint = new Constraints();
-		for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 42 * 4; j++)
-				scheduleBackupLvl2[i][j] = this.schedule[i][j];
-	}
-
-	public void backupNursesLvl2() {
-		NurseManager.backupNursesLvl2();
-	}
-
-	public Schedule(int[][] schedule) {
-		this.schedule = schedule;
+			for (int j = 0; j < 42 * 4; j++){
+				if(j<28)
+					schedule[i][j] = scheduleToCopy[i][j];
+				else
+					schedule[i][j] = 0;
+			}
+					
+		
 	}
 
 	public int getScheduleInfo(int row, int col) {
@@ -118,16 +104,14 @@ public class Schedule {
 
 		nurse.consecutiveShifts++;
 
-		
 		nurse.totalWorkedTime += 8;
-		if(NurseCalculations.isFirstWeek(shift)){
+		if (NurseCalculations.isFirstWeek(shift)) {
 			nurse.hoursToSubtract += 8;
 		}
-		
 
 		if (isWeekend) {
 			if (!nurse.thisWeekend) {
-				if(NurseCalculations.isFirstWeek(shift)){
+				if (NurseCalculations.isFirstWeek(shift)) {
 					nurse.workingWeekendsToSubtract++;
 				}
 				nurse.workingWeekends++;
@@ -138,9 +122,9 @@ public class Schedule {
 
 		if (isNightShift) {
 			nurse.consecutiveNightShifts++;
-			if(nurse.consecutiveNightShifts >= 2)
+			if (nurse.consecutiveNightShifts >= 2)
 				nurse.notRestedAfterConsecutiveNights = true;
-			if(NurseCalculations.isFirstWeek(shift)){
+			if (NurseCalculations.isFirstWeek(shift)) {
 				nurse.nightShiftsThisPeriodToSubtract++;
 				nurse.nightShiftThisWeekendToSubtract++;
 			}
@@ -150,10 +134,9 @@ public class Schedule {
 			// shift: " + shift + " nightSHiftsThisPeriod: "
 			// + nurse.nightShiftsThisPeriod);
 		}
-		
-		
-		if((shift % 28) > 18)
-			//bo bedzie to pierwsza zmiana w weekend
+
+		if ((shift % 28) > 18)
+			// bo bedzie to pierwsza zmiana w weekend
 			nurse.softConstraint1++;
 
 		nurse.workedYesterday = true;
@@ -177,8 +160,8 @@ public class Schedule {
 
 		return nursesNotChecked;
 	}
-	
-	public ArrayList<Integer> clearNursesToCheckFirst(ArrayList<Integer> list){
+
+	public ArrayList<Integer> clearNursesToCheckFirst(ArrayList<Integer> list) {
 		return new ArrayList<Integer>();
 	}
 
@@ -193,11 +176,10 @@ public class Schedule {
 			int[] nurseDay = getNurseDayScheduleFromDay(i, day - 1);
 
 			// je�li nie pracowa�a wczoraj
-			if (!checkIfNurseWorkedNightShift(nurseDay)){
+			if (!checkIfNurseWorkedNightShift(nurseDay)) {
 				nurse.lastConsecutiveNighShiftsSeries = nurse.consecutiveNightShifts;
 				nurse.consecutiveNightShifts = 0;
 			}
-				
 
 			if (checkIfNurseWorked(nurseDay))
 				nurse.workedYesterday = true;
@@ -209,21 +191,21 @@ public class Schedule {
 		}
 	}
 
-	public void clearNurseDataFromImportedWeek(){
+	public void clearNurseDataFromImportedWeek() {
 		Nurse nurse;
 		for (int i = 0; i < 16; i++) {
 			nurse = NurseManager.getNurse(i);
-			//TODO
-			//test this
-			//wyczyscic night shifts z tygodnia -1
-			//wyczyscic working weekends z tygodnia -1
+			// TODO
+			// test this
+			// wyczyscic night shifts z tygodnia -1
+			// wyczyscic working weekends z tygodnia -1
 			nurse.nightShiftsThisPeriod -= nurse.nightShiftsThisPeriodToSubtract;
 			nurse.nightShiftThisWeekend -= nurse.nightShiftThisWeekendToSubtract;
 			nurse.workingWeekends -= nurse.workingWeekendsToSubtract;
 			nurse.totalWorkedTime -= nurse.hoursToSubtract;
 		}
 	}
-	
+
 	public ArrayList<Integer> copyList(ArrayList<Integer> list) {
 		ArrayList<Integer> listToReturn = new ArrayList<Integer>();
 		for (Integer i : list) {
@@ -233,55 +215,78 @@ public class Schedule {
 		return listToReturn;
 	}
 
-	public void testIndividual() throws Exception {
+	public void setFirstWeekSchedule() throws Exception {
 		int nursesScheduledForTheDay = 0;
-		
-		for (int shift = 0; shift < 42 * 4; shift++) {
+
+		for (int shift = 0; shift < 28; shift++) {
 			// is new week?
 			if (shift % 28 == 0) {
-				
+
 				clearNurseDataWeekly();
 			}
 			// is new day?
-			if (shift % 4 == 0){	
+			if (shift % 4 == 0) {
 				nursesScheduledForTheDay = 0;
 				constraint.checkSoftConstraints();
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
 			}
-			
-			//clear specific data from week -1
-			if(shift == 140){
+
+			for (int nurseId = 0; nurseId < 16; nurseId++) {
+					if (schedule[nurseId][shift] == 1) {
+						setSchedule(nurseId, shift);
+					}
+				
+			}
+		}
+
+	}
+
+	public void testIndividual() throws Exception {
+		int nursesScheduledForTheDay = 0;
+
+		for (int shift = 0; shift < 42 * 4; shift++) {
+			// is new week?
+			if (shift % 28 == 0) {
+
+				clearNurseDataWeekly();
+			}
+			// is new day?
+			if (shift % 4 == 0) {
+				nursesScheduledForTheDay = 0;
+				constraint.checkSoftConstraints();
+				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
+			}
+
+			// clear specific data from week -1
+			if (shift == 140) {
 				clearNurseDataFromImportedWeek();
 			}
-				
+
 			for (int nurseId = 0; nurseId < 16; nurseId++) {
-				
+
 				if (schedule[nurseId][shift] == 1) {
 					schedule[nurseId][shift] = 0;
-					if(shift == 34 && nurseId == 15)
+					if (shift == 34 && nurseId == 15)
 						System.out.println("");
-					if (constraint.checkSchedule(nurseId, shift, schedule)){
+					if (constraint.checkSchedule(nurseId, shift, schedule)) {
 						setSchedule(nurseId, shift);
 						nursesScheduledForTheDay++;
-						// uda�o si� przydzieli� do tej zmiany tyle ile potrzeba
+						// uda�o si� przydzieli� do tej zmiany tyle ile
+						// potrzeba
 						if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
-							
-							if(shift % 28 == 0 ){
+							if (shift % 28 == 0) {
 								constraint.checkSoftConstraints();
 							}
-
 
 							// przechodzimy do nast�pnej zmiany
 							break;
 						}
 					}
-						
-					
+
 					else
 						throw new Exception("Nurse: " + nurseId + " shift: " + shift);
 				}
-
 
 			}
 
@@ -291,6 +296,9 @@ public class Schedule {
 
 	// tworzy randomowego reprezentanta (randomowy harmonogram)
 	public int generateIndividual() throws Exception {
+		
+		setFirstWeekSchedule();
+		
 		int failedAttemptsLvl1 = 0, failedAttemptsLvl2 = 0;
 		int nursesScheduledForTheDay = 0;
 		int lastScheduledNurse = 0;
@@ -301,11 +309,10 @@ public class Schedule {
 		nursesToCheckFirst.add(new Integer(13));
 		nursesToCheckFirst.add(new Integer(14));
 		nursesToCheckFirst.add(new Integer(15));
-		
 
 		int nurseId = 0;
 
-		for (int shift = 0; shift < 42 * 4; shift++) {
+		for (int shift = 28; shift < 42 * 4; shift++) {
 			nursesNotChecked = fillNursesNotCheckedList(nursesNotChecked);
 			nursesOnSaturday = copyList(nursesOnSaturdayCopy);
 
@@ -317,13 +324,13 @@ public class Schedule {
 			}
 
 			// is new day?
-			if (shift % 4 == 0){
+			if (shift % 4 == 0) {
 				constraint.checkSoftConstraints();
 				clearNurseDataDaily(NurseCalculations.convertShiftToDay(shift));
 			}
-			
-			//is a new scheduling period?
-			if(shift % 140 == 0){
+
+			// is a new scheduling period?
+			if (shift % 140 == 0) {
 				clearNurseDataFromImportedWeek();
 			}
 
@@ -333,35 +340,30 @@ public class Schedule {
 			while (true) {
 
 				if (NurseCalculations.checkIfItIsSunday(shift) && nursesOnSaturday.size() > 0) {
-					// je�li to niedziela to najpierw spr�buj przydzieli� t� z
+					// je�li to niedziela to najpierw spr�buj przydzieli�
+					// t� z
 					// soboty
 					nurseId = NurseCalculations.randomNurseDraw(nursesOnSaturday);
 					nursesOnSaturday.remove(new Integer(nurseId));
 				}
-				
-				//tutaj wpadaj� zmiany dzienne z dni powszednich
-				//nale�y unika� piel�gniarek part-time-job
+
+				// tutaj wpadaj� zmiany dzienne z dni powszednich
+				// nale�y unika� piel�gniarek part-time-job
 				else {
-					if(nursesNotChecked.size() > 0){
+					if (nursesNotChecked.size() > 0) {
 						nurseId = NurseCalculations.randomNurseDraw(nursesNotChecked);
-					}
-					else
+					} else
 						return 0;
 
 				}
-				
-				//je�li to zmiana nocna to uwa�aj na soft constraint 3
-				if(NurseCalculations.isNightShift(shift)){	
-					if(nursesToCheckFirst.size() > 0){
+
+				// je�li to zmiana nocna to uwa�aj na soft constraint 3
+				if (NurseCalculations.isNightShift(shift)) {
+					if (nursesToCheckFirst.size() > 0) {
 						nurseId = NurseCalculations.randomNurseDraw(nursesToCheckFirst);
 						nursesToCheckFirst.remove(new Integer(nurseId));
 					}
 				}
-				
-
-				
-				
-				
 
 				nursesNotChecked.remove(new Integer(nurseId));
 				if (constraint.checkSchedule(nurseId, shift, schedule)) {
@@ -370,25 +372,26 @@ public class Schedule {
 						nursesOnSaturdayCopy.add(new Integer(nurseId));
 					}
 					setSchedule(nurseId, shift);
-					//TODO
+					// TODO
 					Nurse nurse = NurseManager.getNurse(nurseId);
-					//je�li ma aktualnie jedn� zmian� nocn�, to wpisz j� do listy piel�gniarek do sprawdzenia
-					//�eby unikn�� pojedynczych zmian nocnych (soft constraint 3)
-					if(nurse.consecutiveNightShifts == 1){
-						if(nurse.hoursPerWeek > 30){
+					// je�li ma aktualnie jedn� zmian� nocn�, to wpisz
+					// j� do listy piel�gniarek do sprawdzenia
+					// �eby unikn�� pojedynczych zmian nocnych (soft
+					// constraint 3)
+					if (nurse.consecutiveNightShifts == 1) {
+						if (nurse.hoursPerWeek > 30) {
 							nursesToCheckFirst.add(new Integer(nurseId));
 						}
 					}
-					
-					
-					
+
 					nursesScheduledForTheDay++;
 					failedAttemptsLvl1 = 0;
 
-					// uda�o si� przydzieli� do tej zmiany tyle ile potrzeba
+					// uda�o si� przydzieli� do tej zmiany tyle ile
+					// potrzeba
 					if (nursesScheduledForTheDay == NurseCalculations.getRequirementsForTheShift(shift)) {
 
-						if(shift % 28 == 0 ){
+						if (shift % 28 == 0) {
 							constraint.checkSoftConstraints();
 						}
 						break;
@@ -401,7 +404,6 @@ public class Schedule {
 					if (nursesNotChecked.size() == 0) {
 						return 0;
 					}
-
 
 				}
 

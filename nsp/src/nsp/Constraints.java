@@ -346,7 +346,7 @@ public class Constraints {
 		}
 
 		if (shiftsThisWeekTime == 1) {
-			//System.out.println("SC: 1. Nurse: " + nurseId + " shift: " + shift);
+			System.out.println("SC: 1. Nurse: " + nurseId + " shift: " + shift);
 			return 1000;
 		}
 
@@ -363,7 +363,7 @@ public class Constraints {
 	public int consecutiveNightShift() {	
 		if(nurse.hoursPerWeek >= 30){
 			if (nurse.lastConsecutiveNighShiftsSeries == 1) {
-				//System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
+				System.out.println("SC: 3. Nurse: " + nurseId + "shift: " + shift);
 				return 1000;
 			}
 		}

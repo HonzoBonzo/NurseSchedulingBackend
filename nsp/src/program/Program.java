@@ -1,6 +1,7 @@
 package program;
 
 import dataflow.ExportScheduleToHtml;
+import dataflow.ImportFirstWeek;
 import nsp.Constraints;
 import nsp.NurseManager;
 import nsp.Schedule;
@@ -15,10 +16,13 @@ public class Program {
 		GetSatisfyingResult getResult = new GetSatisfyingResult();
 		int i = 0;
 		long lStartTime =System.nanoTime();
-
+		ImportFirstWeek importFirstWeek = new ImportFirstWeek("firstWeek.txt");
 		
-		while(!getResult.generateResult(9000)){
-			//System.out.println("---------------");
+		
+		
+		
+		while(!getResult.generateResult(10000, importFirstWeek.getSchedule() )){
+			System.out.println("---------------");
 		}
 		long lEndTime = System.nanoTime();
 		long output = lEndTime - lStartTime;

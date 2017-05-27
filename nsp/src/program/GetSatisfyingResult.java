@@ -8,8 +8,8 @@ public class GetSatisfyingResult {
 
 	Schedule schedule;
 	
-	public boolean generateResult(int maximumPenalty) throws Exception{
-		schedule = new Schedule();
+	public boolean generateResult(int maximumPenalty, int[][] scheduleWithFirstWeek) throws Exception{
+		this.schedule = new Schedule(scheduleWithFirstWeek);
 		NurseManager.initializeNurses();
 		if(schedule.generateIndividual() == 0)
 			return false;

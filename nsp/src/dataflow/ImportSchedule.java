@@ -17,6 +17,7 @@ public class ImportSchedule {
 		}
 	}
 	
+	
 	public int[][] getSchedule(){
 		return this.schedule;
 	}

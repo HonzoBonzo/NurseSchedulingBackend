@@ -11,7 +11,7 @@ public class Nurse {
 	 int lastConsecutiveNighShiftsSeries = 0;
 	 public boolean workedYesterday;
 	 int consecutiveShifts;
-	 int totalWorkedTime;
+	 public int totalWorkedTime;
 	 public int workingWeekends;
 	 boolean exceptionForRestAfterNightShift;
 	 boolean startedShiftToday;

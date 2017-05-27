@@ -23,6 +23,22 @@ public class SoftConstraintsTest {
 		NurseManager.initializeNurses();
 	}
 	
+	@Test
+	public void clearNurseDataFromImportedWeekTest(){
+		schedule.setSchedule(1, 1);
+		schedule.setSchedule(1, 4 );
+		schedule.setSchedule(1, 9);
+		schedule.setSchedule(1, 14);
+		schedule.setSchedule(1, 20);
+		schedule.setSchedule(1, 24);
+		
+		schedule.clearNurseDataFromImportedWeek();
+		
+		assertEquals(NurseManager.getNurse(1).totalWorkedTime, 0);
+	}
+	
+	
+	
 	/*
 	 * For the period of Friday 22:00 to Monday 0:00 a nurse should have either
 	 * no shifts or at least 2 shifts (‘Complete Weekend’).
