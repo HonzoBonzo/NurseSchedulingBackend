@@ -192,7 +192,7 @@ void ACO::run(int iterations) {
 				// If deadlock occurred, then clear 3 last days
 				// and allocate them again:
 				if (p && day >= 1) {
-					std::cout << "d";
+					//std::cout << "d";
 					// Go back one day:
 					days_back = 1;
 
@@ -223,7 +223,7 @@ void ACO::run(int iterations) {
 				// Go back one day if algorithm can't go to further days:
 				++too_many_tries_for_day;
 				if (/*!p &&*/day >= 1 && (too_many_tries_for_day % 20 == 0)) {
-					std::cout << "t";
+					//std::cout << "t";
 
 					// Go back one day:
 					days_back = 1;
@@ -288,7 +288,7 @@ void ACO::run(int iterations) {
 				if(!p && day >= 1)
 					for (int ant = 0; ant < _no_ants; ++ant)
 						if (!_hard_constraint->consecutive_shifts(_ants[ant])) {
-							std::cout << "c";
+							//std::cout << "c";
 							// Go back one day:
 							days_back = 1;
 
@@ -320,7 +320,7 @@ void ACO::run(int iterations) {
 				if(!p && day >= 1)
 					for (int ant = 0; ant < _no_ants; ++ant)
 						if (!_hard_constraint->maximum_number_of_nights(_ants[ant])) {
-							std::cout << "n";
+							//std::cout << "n";
 
 							// Go back one day:
 							days_back = 1;
@@ -371,7 +371,7 @@ void ACO::run(int iterations) {
 				// Too many backtracks in current week:
 				if (!p && !weekends_planning && backtracks[_d_w(_days[day])] > 10) {
 
-					std::cout << "w";
+					//std::cout << "w";
 
 					int week = _d_w(_days[day]);
 
@@ -476,9 +476,9 @@ void ACO::run(int iterations) {
 		// Log statistics into file statistics.json:
 		_result->log("statistics.json", it, td, id, tc, bc);
 
-		// Save best solution to file results.out:
+		// Save best solution to file tab.txt:
 		_result->begin(_solution);
-		_result->export_into("results.out");
+		_result->export_into("tab.txt");
 
 		print_solution();
 		count_hours();

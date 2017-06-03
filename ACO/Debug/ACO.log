@@ -1,6 +1,4 @@
-﻿  Result.cpp
-g:\studia\vi\pz\aco\aco\result.cpp(77): warning C4101: 'json_str': unreferenced local variable
-  ACO.cpp
+﻿  ACO.cpp
 g:\studia\vi\pz\aco\aco\randoms.cpp(71): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 g:\studia\vi\pz\aco\aco\randoms.cpp(72): warning C4305: 'return': truncation from 'double' to 'float'
 g:\studia\vi\pz\aco\aco\randoms.cpp(89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
@@ -11,7 +9,6 @@ g:\studia\vi\pz\aco\aco\aco.cpp(24): warning C4297: 'ACO::~ACO': function assume
   g:\studia\vi\pz\aco\aco\aco.cpp(24): note: destructor or deallocator has a (possibly implicit) non-throwing exception specification
 g:\studia\vi\pz\aco\aco\aco.cpp(38): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
 g:\studia\vi\pz\aco\aco\aco.cpp(30): warning C4101: 'back': unreferenced local variable
-  Generating Code...
 g:\studia\vi\pz\aco\aco\aco.cpp(1120): warning C4715: 'ACO::_D': not all control paths return a value
   ACO.vcxproj -> G:\Studia\VI\PZ\ACO\ACO\Debug\ACO.exe
   ACO.vcxproj -> G:\Studia\VI\PZ\ACO\ACO\Debug\ACO.pdb (Partial PDB)

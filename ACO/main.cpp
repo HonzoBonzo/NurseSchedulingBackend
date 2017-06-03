@@ -53,9 +53,6 @@ int main() {
 		// Prepare graph and pheromones matrix for optimization 
 		// by reading results from file:
 		//aco.prepare("data1.in");
-		//aco.prepare("data2.in");
-		//aco.prepare("data3.in");
-		//aco.prepare("data4.in");
 
 		//aco.print_solution();
 
