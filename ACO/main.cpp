@@ -30,7 +30,7 @@ int main() {
 	// Number of employee:
 	int no_ants = 16;
 	// Maximum number of iterations:
-	int iterations = 1000;
+	int iterations = 50;
 
 	try {
 		// Create instance of ACO class:

@@ -57,7 +57,11 @@ private:
 	bool _all_possibilities(char*);
 	void _update_used_ants(int);
 	void _repair_day(int);
+
 	void _select_weekends();
+	void _select_weekends(int);
+	void _clear_weekends(int);
+
 	int _weekend_allocation_valid();
 	void _update_shifts_per_week();
 	void _update_shifts_per_week(int);

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include "Result.h"
 
 Result::Result(int no_employees, int no_days, int no_shifts) : _no_employess{ no_employees }, _no_days{ no_days }, _no_shifts{no_shifts} {
@@ -39,7 +40,8 @@ bool Result::import_from(const char* filename) {
 
 bool Result::export_into(const char* filename) {
 	std::ofstream file;
-	char day[4] = {0,0,0,0};
+	char image[8] = { '0', ' ', '0', ' ', '0', ' ', '0', ' ' };
+	char day[8];
 	int employee;
 
 	file.open(filename, std::ios::out | std::ios::trunc);
@@ -48,12 +50,13 @@ bool Result::export_into(const char* filename) {
 		employee = 0;
 		while (employee < _no_employess) {
 			for (int d = 0; d < _no_days; ++d) {
-				std::memset((void*)day, '0', 4);
-				if (_result[employee][5 * d + EARLY] == 1) day[EARLY] = '1';
-				else if (_result[employee][5 * d + DAY] == 1) day[DAY] = '1';
-				else if (_result[employee][5 * d + LATE] == 1) day[LATE] = '1';
-				else if (_result[employee][5 * d + NIGHT] == 1) day[NIGHT] = '1';
-				file.write(day, 4);
+				std::memcpy((void*)day, (const void*)image, 8);
+				//std::memset((void*)day, '0', 4);
+				if (_result[employee][5 * d + EARLY] == 1) day[2 * EARLY] = '1';
+				else if (_result[employee][5 * d + DAY] == 1) day[2 * DAY] = '1';
+				else if (_result[employee][5 * d + LATE] == 1) day[2 * LATE] = '1';
+				else if (_result[employee][5 * d + NIGHT] == 1) day[2 * NIGHT] = '1';
+				file.write(day, 8);
 			}
 			file.put('\n');
 			++employee;
@@ -63,6 +66,30 @@ bool Result::export_into(const char* filename) {
 		return true;
 	}
 	return false;
+}
+
+bool Result::log(const char* filename, int it, double td, double id, int tc, int bc) {
+
+	using std::stringstream;
+	using std::ofstream;
+
+	int len = 0;
+	const char *json_str;
+
+	// Create string stream to write json format into:
+	stringstream json;
+	json << "{\"it\":" << it << ", \"td\":" << td << ", \"id\":" << id << ", \"tc\":" << tc << ", \"bc\":" << bc << "}\0";
+
+	ofstream out;
+	out.open(filename, std::ios::out | std::ios::trunc);
+	if (out.is_open()) {
+		// Write into file:
+		out.write(json.str().c_str(), std::strlen(json.str().c_str()));
+
+		out.close();
+		return true;
+	}
+	return true;
 }
 
 char** Result::begin(char** result = nullptr) {

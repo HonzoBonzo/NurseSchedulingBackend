@@ -102,7 +102,7 @@ bool HardConstraint::rest_hours_after_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int sn = 0, sr = 0, k1, k2;
 
-	for (int d = 0; (d < _no_days && d < _max_no_days - 3); ++d) {
+	for (int d = 0; (d < _no_days - 3 && d < _max_no_days - 3); ++d) {
 		sn = ptr[_ns_j(d)] + ptr[_ns_j((d + 1) % _max_no_days)];
 		k1 = _es_j(d + 2);
 		k2 = _es_j(d + 3);
@@ -120,7 +120,7 @@ bool HardConstraint::rest_hours_in_any_consecutive_24_period(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0, k1, k2;
 
-	for (int d = 0; (d < _no_days && d < _max_no_days - 1); ++d) {
+	for (int d = 0; (d < _no_days - 1 && d < _max_no_days - 1); ++d) {
 		k1 = _es_j(d);
 		k2 = _es_j((d + 1) % _max_no_days);
 		s += (ptr[k1 + LATE] == 1 && ptr[k2 + EARLY] == 1)
@@ -151,7 +151,7 @@ bool HardConstraint::consecutive_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0;
 
-	for (int d = 0; (d < _no_days && d < _max_no_days - 3); ++d) {
+	for (int d = 0; (d < _no_days - 3 && d < _max_no_days - 3); ++d) {
 		s = ptr[_ns_j(d)] + ptr[_ns_j((d + 1) % _max_no_days)] 
 			+ ptr[_ns_j((d + 2) % _max_no_days)] + ptr[_ns_j((d + 3) % _max_no_days)];
 		if (s > 3) return false;
@@ -166,11 +166,12 @@ bool HardConstraint::consecutive_shifts(int employee) {
 	int s = 0, k;
 
 	for (int d = 0; d < _no_days - 6; ++d) {
+		s = 0;
 		/*s = ptr[_rs_j(d)] + ptr[_rs_j((d + 1) % _max_no_days)] + ptr[_rs_j((d + 2) % _max_no_days)]
 			+ ptr[_rs_j((d + 3) % _max_no_days)] + ptr[_rs_j((d + 4) % _max_no_days)]
 			+ ptr[_rs_j((d + 5) % _max_no_days)] + ptr[_rs_j((d + 6) % _max_no_days)];*/
 		k = _es_j(d);
-		s = ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
 		k = _es_j(d + 1);
 		s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
 		k = _es_j(d + 2);

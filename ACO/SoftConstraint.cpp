@@ -1,20 +1,23 @@
-#include "SoftConstraint.h"
+﻿#include "SoftConstraint.h"
 
 int SoftConstraint::f1(int employee) {
 
 	return 0;
 }
 
+/* 2. For employees with availability of 30 ‐ 48 hours per week, the
+length of a series of night shifts should be within the range 2 ‐ 3.
+It could be before another series. */
 int SoftConstraint::f2(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int count = 0, n;
 
-	if (employee > 12) return 0;
+	/*if (employee > 12) return 0;
 
 	for (int d = 0; d < _no_days - 2; ++d) {
 		n = ptr[_ns_j(d)] + ptr[_ns_j(d + 1)] + ptr[_ns_j(d + 2)];
 		if (n == 1) ++count;
-	}
+	}*/
 
 	return count;
 }

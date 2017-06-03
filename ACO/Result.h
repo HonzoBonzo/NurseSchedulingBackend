@@ -11,6 +11,8 @@ public:
 	bool import_from(const char*);
 	bool export_into(const char*);
 
+	bool log(const char*,int it, double td, double id, int tc, int bc);
+
 	char **begin(char **);
 	void reserve();
 
