@@ -155,6 +155,37 @@ public class ConstraintsTest {
 		assertEquals(true, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
 	}
 
+	
+	@Test
+	public void weekendOfDuty2() {
+		//w1
+		schedule.setSchedule(5, 20);
+		schedule.setSchedule(5, 25);
+		schedule.clearNurseDataWeekly();
+		//w2
+		schedule.setSchedule(5, 47); //night shift on friday
+		schedule.clearNurseDataWeekly();
+		//w3
+		schedule.setSchedule(5, 77);
+		schedule.setSchedule(5, 81);
+		schedule.clearNurseDataWeekly();
+		
+				
+		// cant have 4th working weekend
+		constraint.checkSchedule(5, 104, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
+		constraint.checkSchedule(5, 108, schedule.getAllSchedule());
+		assertEquals(false, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
+		
+		
+		schedule.clearNurseDataFromImportedWeek();
+		
+		constraint.checkSchedule(5, 162, schedule.getAllSchedule());
+		assertEquals(true, constraint.isNumberOfFreeWeekendsMoreOrEqualThenTwo());
+		
+		
+	}
+	
 	/*
 	 * Following a series of at least 2 consecutive night shifts a 42 hours rest
 	 * is required.

@@ -164,7 +164,7 @@ public class Constraints {
 
 		int previousShift = getPreviousShift();
 		if (NurseCalculations.checkIfItIsTheWeekend(previousShift)) {
-			if (shift - previousShift < 8) {
+			if (shift - previousShift <= 8) {
 				// then it was the same weekend
 				return true;
 			}
