@@ -337,9 +337,9 @@ public class Constraints {
 		int shiftsThisWeekTime = 0;
 		// sprawdzane na poprzedni tydzie� w pierwsz� zmian� nast�pnego tygodnia
 		if (shift % 28 == 0 && shift != 0) {
-			// pobierz ostatnie 9 zmian, czyli do zmiany nocnej w pi�tek
+			// pobierz ostatnie 9 zmian, czyli do zmiany LATE w pi�tek
 			// w��cznie
-			for (int i = 1; i < 10; i++) {
+			for (int i = 1; i < 11; i++) {
 				if (schedule[nurseId][shift - i] == 1)
 					shiftsThisWeekTime++;
 			}
