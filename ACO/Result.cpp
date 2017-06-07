@@ -49,7 +49,7 @@ bool Result::export_into(const char* filename) {
 
 		employee = 0;
 		while (employee < _no_employess) {
-			for (int d = 0; d < _no_days; ++d) {
+			for (int d = 0; d < (_no_days + 7); ++d) {
 				std::memcpy((void*)day, (const void*)image, 8);
 				//std::memset((void*)day, '0', 4);
 				if (_result[employee][5 * d + EARLY] == 1) day[2 * EARLY] = '1';

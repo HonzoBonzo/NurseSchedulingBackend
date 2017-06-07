@@ -901,14 +901,14 @@ double ACO::_calculate_probability(int d, int shift1, int shift2, int ant) {
 }
 
 void ACO::_remember_best() {
-	int whole_shifts = _no_days * _no_shifts;
+	int whole_shifts = (_no_days + 7) * _no_shifts;
 	int cost = _total_cost();
 	if (cost < _best_total_cost) {
 		// if result is better then prevoius one - change it
 		_best_total_cost = cost;
 		for (int ant = 0; ant < _no_ants; ++ant) {
 			for (int shift = 0; shift < whole_shifts; ++shift)
-				_solution[ant][shift] = _routes[ant][shift];
+				_solution[ant][shift] = _area[ant][shift];
 		}
 	}
 	return;
@@ -1194,7 +1194,7 @@ void ACO::_deallocate_heuristics() {
 
 void ACO::_initialize_solution() {
 	try {
-		int whole_shifts = _no_days * _no_shifts;
+		int whole_shifts = (_no_days + 7) * _no_shifts;
 		// Solution structure: alloacate row:
 		_solution = new char*[_no_ants] {nullptr};
 

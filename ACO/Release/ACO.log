@@ -10,10 +10,18 @@ ACO.cpp(26): warning C4297: 'ACO::~ACO': function assumed not to throw an except
 ACO.cpp(680): warning C4101: 's': unreferenced local variable
 ACO.cpp(1042): warning C4101: 'ant1': unreferenced local variable
 ACO.cpp(1042): warning C4101: 'ant2': unreferenced local variable
+  Result.cpp
+Result.cpp(107): warning C4101: 'json_str': unreferenced local variable
+  main.cpp
+g:\studia\vi\pz\aco\aco\Randoms.cpp(71): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\Randoms.cpp(72): warning C4305: 'return': truncation from 'double' to 'float'
+g:\studia\vi\pz\aco\aco\Randoms.cpp(89): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\Randoms.cpp(90): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+g:\studia\vi\pz\aco\aco\Randoms.cpp(94): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Generating code
-  2 of 346 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
+  6 of 346 functions ( 1.7%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    35 functions had inline decision re-evaluated but remain unchanged
+    10 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   ACO.vcxproj -> G:\Studia\VI\PZ\ACO\ACO\Release\ACO.exe
   ACO.vcxproj -> G:\Studia\VI\PZ\ACO\ACO\Release\ACO.pdb (Full PDB)
