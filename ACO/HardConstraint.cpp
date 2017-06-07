@@ -71,7 +71,7 @@ bool HardConstraint::maximum_number_of_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0;
 
-	for (int d = 0; d < _no_days; ++d) 
+	for (int d = 0; d < _max_no_days; ++d)
 		s += ptr[_ns_j(d)];
 
 	if (s > 3) return false;
@@ -102,14 +102,14 @@ bool HardConstraint::rest_hours_after_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int sn = 0, sr = 0, k1, k2;
 
-	for (int d = 0; (d < _no_days - 3 && d < _max_no_days - 3); ++d) {
-		sn = ptr[_ns_j(d)] + ptr[_ns_j((d + 1) % _max_no_days)];
-		k1 = _es_j(d + 2);
-		k2 = _es_j(d + 3);
+	for (int d = 0; (/*d < _no_days - 3 &&*/ d < _max_no_days - 4); ++d) {
+		sn = ptr[_ns_j(d)] + ptr[_ns_j(d + 1)] + ptr[_ns_j(d + 2)];
+		k1 = _es_j(d + 3);
+		k2 = _es_j(d + 4);
 		sr = ptr[k1 + EARLY] + ptr[k1 + DAY] + ptr[k1 + LATE] + ptr[k1 + NIGHT]
 			+ ptr[k2 + EARLY] + ptr[k2 + DAY] + ptr[k2 + LATE] + ptr[k2 + NIGHT];
 		//sr = ptr[_rs_j((d + 2) % _max_no_days)] + ptr[_rs_j((d + 3) % _max_no_days)];
-		if (sn == 2 && sr != 0) return false;
+		if (sn == 3 && sr != 0) return false;
 	}
 
 	return true;
@@ -120,7 +120,7 @@ bool HardConstraint::rest_hours_in_any_consecutive_24_period(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0, k1, k2;
 
-	for (int d = 0; (d < _no_days - 1 && d < _max_no_days - 1); ++d) {
+	for (int d = 0; (/*d < _no_days - 1 &&*/ d < _max_no_days - 1); ++d) {
 		k1 = _es_j(d);
 		k2 = _es_j((d + 1) % _max_no_days);
 		s += (ptr[k1 + LATE] == 1 && ptr[k2 + EARLY] == 1)
@@ -151,7 +151,7 @@ bool HardConstraint::consecutive_nights(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0;
 
-	for (int d = 0; (d < _no_days - 3 && d < _max_no_days - 3); ++d) {
+	for (int d = 0; (/*d < _no_days - 3 &&*/ d < _max_no_days - 3); ++d) {
 		s = ptr[_ns_j(d)] + ptr[_ns_j((d + 1) % _max_no_days)] 
 			+ ptr[_ns_j((d + 2) % _max_no_days)] + ptr[_ns_j((d + 3) % _max_no_days)];
 		if (s > 3) return false;
@@ -165,7 +165,7 @@ bool HardConstraint::consecutive_shifts(int employee) {
 	char *ptr = &_solution[employee][0], *tmp;
 	int s = 0, k;
 
-	for (int d = 0; d < _no_days - 6; ++d) {
+	for (int d = 0; d < _max_no_days - 6; ++d) {
 		s = 0;
 		/*s = ptr[_rs_j(d)] + ptr[_rs_j((d + 1) % _max_no_days)] + ptr[_rs_j((d + 2) % _max_no_days)]
 			+ ptr[_rs_j((d + 3) % _max_no_days)] + ptr[_rs_j((d + 4) % _max_no_days)]

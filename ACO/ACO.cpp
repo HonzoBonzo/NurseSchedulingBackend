@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <limits>
 #include <time.h>
+#include <algorithm>
+#include <functional>
 
 #include "ACO.h"
 #include "ACOException.h"
@@ -27,28 +29,38 @@ ACO::~ACO() {
 
 void ACO::run(int iterations) {
 	clock_t clocks, clocks_it;
-	int h = 0, p, k, r, back, old, s, it, wd, subperiod;
-	int too_many_tries_for_day = 0;
-	int deads = 0;
+	int p, k, it, too_many_tries_for_day = 0, week;
 
 	// Statistics info:
 	double td = 0., id = 0.;
 	int tc = 0, bc = 0;
 
-	int ant_r = 0.;
-
 	int backtracks[5] = {0,0,0,0,0};
-	int weekend_oscillations[5] = {0,0,0,0,0};
+	int weekends[5] = {0,0,0,0,0};
+	int backtracks_counter[5] = {0,0,0,0,0};
 
 	int weekends_planning = 0;
 	int days_back = 0;
 	int day_before_jump = -1;
+
+	int deadlock_count = 1500;
+
+
+
 
 	std::cout << "\n Maximum number of iterations: " << iterations << "\n"
 		<< " Maximum duration: ";
 	if (_maximum_duration == 0) std::cout << "unlimited\n";
 	else std::cout << _maximum_duration << " [s]\n";
 	std::cout << " Best cost level: " << _minimum_cost << "\n\n Run:\n";
+
+	_initialize_shift_permutations();
+
+	/*int *ptr;
+	for (int i = 0; i < 50; ++i) {
+		ptr = s20[i];
+		std::cout << ptr[0] << " " << ptr[1] << " " << ptr[2] << " " << ptr[3] << " " << ptr[4] << " " << std::endl;
+	}
 
 	int s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
 	_select_correct_shift_distribution();
@@ -64,62 +76,19 @@ void ACO::run(int iterations) {
 		s5 += _shift_distribution[ant][4];
 		std::cout << "\n";
 	}
-	std::cout << s1 << " " << s2 << " " << s3 << " " << s4 << " " << s5 << "\n\n";
-
-	_shuffle_days();
-
-	/*for (int i = 0; i < _no_days; ++i)
-		std::cout << _days[i] << " ";
-	std::cout << "\n\n";
-
-	_select_weekends(0);
-	for (int i = 0; i < _no_ants; ++i) {
-		std::cout << "[" << i << "] " << "{" << (int)_weekends[_selected_weekends[i]][0] << ", " << (int)_weekends[_selected_weekends[i]][1] << "}" << std::endl;
-	}
-	std::cout << "\n";
-
-	_select_weekends(1);
-	for (int i = 0; i < _no_ants; ++i) {
-		std::cout << "[" << i << "] " << "{" << (int)_weekends[_selected_weekends[i]][0] << ", " << (int)_weekends[_selected_weekends[i]][1] << "}" << std::endl;
-	}
-	std::cout << "\n";
-
-	_select_weekends(2);
-	for (int i = 0; i < _no_ants; ++i) {
-		std::cout << "[" << i << "] " << "{" << (int)_weekends[_selected_weekends[i]][0] << ", " << (int)_weekends[_selected_weekends[i]][1] << "}" << std::endl;
-	}
-	std::cout << "\n";
-
-	_select_weekends(3);
-	for (int i = 0; i < _no_ants; ++i) {
-		std::cout << "[" << i << "] " << "{" << (int)_weekends[_selected_weekends[i]][0] << ", " << (int)_weekends[_selected_weekends[i]][1] << "}" << std::endl;
-	}
-	std::cout << "\n";
-
-	_select_weekends(4);
-	for (int i = 0; i < _no_ants; ++i) {
-		std::cout << "[" << i << "] " << "{" << (int)_weekends[_selected_weekends[i]][0] << ", " << (int)_weekends[_selected_weekends[i]][1] << "}" << std::endl;
-	}
-	std::cout << "\n";
-
-	return;*/
-
+	std::cout << s1 << " " << s2 << " " << s3 << " " << s4 << " " << s5 << "\n\n";*/
 	
+	_shuffle_days();
 
 	clocks_it = clock();
 	for (it = 1; it <= iterations; ++it) {
 
 		clocks = clock();
-		s = 0;
-		r = 0;
-		wd = 0;
 
-		old = 0;
-		subperiod = 0;
-
-		// Zero backtracks:
+		// Zero backtracks and counters:
 		std::memset((void*)backtracks, 0, sizeof(backtracks));
-		std::memset((void*)weekend_oscillations, 0, sizeof(weekend_oscillations));
+		std::memset((void*)weekends, 0, sizeof(weekends));
+		std::memset((void*)backtracks_counter, 0, sizeof(backtracks_counter));
 
 		// Clears routes for all ant colony:
 		_clear_routes();
@@ -132,12 +101,78 @@ void ACO::run(int iterations) {
 
 		for (int day = 0; day < _no_days; ++day) {
 
+			week = _d_w(_days[day]);
+
+			// Too many weekends reschedulings:
+			if ((backtracks_counter[_d_w(_days[day])] > 30) || weekends[week] > 200) {
+				_clear_routes();
+				day = -1;
+				_select_correct_shift_distribution();
+				_select_weekends(0);
+				
+				std::memset((void*)backtracks, 0, sizeof(backtracks));
+				std::memset((void*)weekends, 0, sizeof(weekends));
+				std::memset((void*)backtracks_counter, 0, sizeof(backtracks_counter));
+
+				too_many_tries_for_day = 0;
+				weekends_planning = 0;
+				std::cout /*<< "q"*/ << std::endl;
+				continue;
+			}
+
 			// Jump after weekend rescheduling:
 			if (weekends_planning && day > 9) {
 				weekends_planning = 0;
 				day = day_before_jump;
 				day_before_jump = -1;
+				std::memset((void*)weekends, 0, sizeof(weekends));
 			}
+			else if (weekends_planning)
+				weekends[week]++;
+
+			// Too many backtracks in current week:
+			if (!weekends_planning && backtracks[_d_w(_days[day])] > 2) {
+
+				//std::cout << "w";
+
+				// Select rest of weekends starting with current weekend:
+				_select_weekends(week);
+
+				// Clear schedule for rest of weekends:
+				_clear_weekends(week);
+
+				// After rescheduling weekends algorithm should jump back to 
+				// the day before jump to weekends.
+				days_back = 0;
+				while (week == _d_w(_days[day - days_back]) && days_back <= 4) {
+					//_clear_day(_days[day]);
+					++days_back;
+				}
+				--days_back;
+
+				_clear_last_days(day, days_back); // clear current day
+				day_before_jump = day - days_back;
+
+				// Zero backtracks for current week:
+				backtracks[week] = 0;
+
+				// Jump to weekend:
+				day = 2 * week - 1;
+
+				// Set planning weekend flag - if reschedule:
+				weekends_planning = 1;
+
+				backtracks_counter[week]++;
+
+				p = 1;
+			}
+
+			// For working day set larger amount of deadlock tries:
+			if (_working_day_d(_days[day]))
+				deadlock_count = 1000;
+			// For weekend days set smaller amount of deadlock tries:
+			else
+				deadlock_count = 500;
 
 			// Set amount of days to check hard constraints:
 			_hard_constraint->set_days(_days[day] + 1);
@@ -145,309 +180,232 @@ void ACO::run(int iterations) {
 			// Zero tries for current day:
 			too_many_tries_for_day = 0;
 
-			do {
-				// Break condition:
-				p = 0;
+			// Ants should not go in sequence:
+			_shuffle_ants(_days[day]);
 
-				// Clear the allocation for current day:
-				_clear_day(_days[day]);
 
-				// Clear previously allocated ants:
-				_clear_used_ants();
 
-				// Ants should not go in sequence:
-				_shuffle_ants(3);
+			// Break condition:
+			p = 0;
 
-				for (int shift = 0; shift < 4; ++shift) {
-					k = 0;
-					do {
-						// Clear allocation for current shift:
-						_clear_shift(_d_j(_days[day]) + shift);
+			// Clear the allocation for current day:
+			_clear_day(_days[day]);
 
-						for (int ant = 0; ant < _no_ants; ++ant) {
-							// Don't use previously used ants - only one shift per day:
-							if (_used_ants[_ants[ant]] > -1) continue;
-							// Go through graph:
-							_route(_ants[ant], day, _d_j(_days[day]) + shift);
-						}
-						//std::cout << '#';
+			// Clear previously allocated ants:
+			_clear_used_ants();
 
-						// Deadlock break machanism:
-						// Count 50 is experimentally selected.
-						if (++k > 100) {
-							p = 1;
-							break;
-						}
+			for (int shift = 0; shift < 4; ++shift) {
+				k = 0;
+				do {
+					// Clear allocation for current shift:
+					_clear_shift(_d_j(_days[day]) + shift);
 
-						// Check allocation for current shift.
-					} while (_allocation_valid(_d_j(_days[day]) + shift) != 0);
-
-					// If deadlock occurred then close day:
-					if (p) break;
-
-					// Mark allocated ants:
-					_update_used_ants(_d_j(_days[day]) + shift);
-				}
-
-				// If deadlock occurred, then clear 3 last days
-				// and allocate them again:
-				if (p && day >= 1) {
-					//std::cout << "d";
-					// Go back one day:
-					days_back = 1;
-
-					// If tries to go back further then to the beginnig of current week then suppress:
-					if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
-						days_back = 0;
-
-					// If saturday is planning then shouldn't go further back in time:
-					if (_days[day] % 7 == 5)
-						days_back = 0;
-
-					if (_working_day_d(_days[day]))
-						// Increment backtracks for current week:
-						backtracks[_d_w(_days[day])]++;
-					else if(_days[day] % 7 == 5)
-						// Can't mix weekends if saturday is complete: 
-						_select_weekends(_d_w(_days[day]));
-
-					// Weekend oscillations detection:
-					if (_days[day] % 7 == 6 && days_back == 1)
-						weekend_oscillations[_d_w(_days[day])]++;
-
-					// Go back in days:
-					_clear_last_days(day, days_back);
-					day -= days_back + 1;
-				}
-
-				// Go back one day if algorithm can't go to further days:
-				++too_many_tries_for_day;
-				if (/*!p &&*/day >= 1 && (too_many_tries_for_day % 20 == 0)) {
-					//std::cout << "t";
-
-					// Go back one day:
-					days_back = 1;
-
-					// If tries to go back further then to the beginnig of current week then suppress:
-					//if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
-					//	days_back = 0;
-
-					// If saturday is planning then shouldn't go further back in time:
-					if (_days[day] % 7 == 5)
-						days_back = 0;
-
-					if (_working_day_d(_days[day]))
-						// Increment backtracks for current week:
-						backtracks[_d_w(_days[day])]++;
-					else if (_days[day] % 7 == 5)
-						// Can't mix weekends if saturday is complete: 
-						_select_weekends(_d_w(_days[day]));
-
-					// Go back in days:
-					_clear_last_days(day, days_back);
-					day -= days_back + 1;
-
-					too_many_tries_for_day = 0;
-					p = 1;
-				}
-
-				// If some ant exceed hours in period, then clear at most 2 days 
-				// or clear allocation to last monday and allocate again:
-				/*if(!p && day >= 1)
-					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_hard_constraint->exceed_hours(_ants[ant])) {
-							std::cout << "e";
-							// Go back one day:
-							days_back = 1;
-
-							// If tries to go back further then to the beginnig of current week then suppress:
-							if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
-								days_back = 0;
-
-							// If saturday is planning then shouldn't go further back in time:
-							if (_days[day] % 7 == 5)
-								days_back = 0;
-
-							if (_working_day_d(_days[day]))
-								// Increment backtracks for current week:
-								backtracks[_d_w(_days[day])]++;
-							else if (_days[day] % 7 == 5)
-								// Can't mix weekends if saturday is complete: 
-								_select_weekends(_d_w(_days[day]));
-
-							// Go back in days:
-							_clear_last_days(day, days_back);
-							day -= days_back + 1;
-							
-							p = 1;
-							break;
-						}*/
-
-				// If some ant has to many consecutive shifts, then clear last 
-				// day and allocate again:
-				if(!p && day >= 1)
-					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_hard_constraint->consecutive_shifts(_ants[ant])) {
-							//std::cout << "c";
-							// Go back one day:
-							days_back = 1;
-
-							// If tries to go back further then to the beginnig of current week then suppress:
-							if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
-								days_back = 0;
-
-							// If saturday is planning then shouldn't go further back in time:
-							if (_days[day] % 7 == 5)
-								days_back = 0;
-
-							if (_working_day_d(_days[day]))
-								// Increment backtracks for current week:
-								backtracks[_d_w(_days[day])]++;
-							else if (_days[day] % 7 == 5)
-								// Can't mix weekends if saturday is complete: 
-								_select_weekends(_d_w(_days[day]));
-
-							// Go back in days:
-							_clear_last_days(day, days_back);
-							day -= days_back + 1;
-
-							p = 1;
-							break;
-						}
-
-				// If some ant has too many nights, 
-				// then clear last day and allocate again:
-				if(!p && day >= 1)
-					for (int ant = 0; ant < _no_ants; ++ant)
-						if (!_hard_constraint->maximum_number_of_nights(_ants[ant])) {
-							//std::cout << "n";
-
-							// Go back one day:
-							days_back = 1;
-
-							// If tries to go back further then to the beginnig of current week then suppress:
-							//if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
-							//	days_back = 0;
-
-							// If saturday is planning then shouldn't go further back in time:
-							if (_days[day] % 7 == 5)
-								days_back = 0;
-							//std::cout << " " << day << "\n";
-							if (_working_day_d(_days[day]))
-								// Increment backtracks for current week:
-								backtracks[_d_w(_days[day])]++;
-							else if (_days[day] % 7 == 5)
-								// Can't mix weekends if saturday is complete: 
-								_select_weekends(_d_w(_days[day]));
-
-							// Go back in days:
-							_clear_last_days(day, days_back);
-							day -= days_back + 1;
-
-							p = 1;
-							break;
-						}
-
-				// Solving weekend oscillations:
-				if (weekends_planning && weekend_oscillations[_d_w(_days[day])] > 5) {
-					
-					int week = _d_w(_days[day]);
-
-					// Clear friday, thursday and wednesday:
-					if (day_before_jump > 0 && _d_w(_days[day_before_jump]) == week && _days[day_before_jump] % 7 >= 2) {
-						_clear_day(7 * week + 4);
-						_clear_day(7 * week + 3);
-						_clear_day(7 * week + 2);
-
-						// After rescheduling weekends, algorithm have to jump to wednesday:
-						//if (day_before_jump > 0 && _days[day_before_jump] % 7 >= 2)
-						day_before_jump = 10 + 5 * week + 2;
+					for (int ant = 0; ant < _no_ants; ++ant) {
+						// Don't use previously used ants - only one shift per day:
+						if (_used_ants[_ants[ant]] > -1) continue;
+						// Go through graph:
+						_route(_ants[ant], day, _d_j(_days[day]) + shift);
 					}
-					// Clear amount of oscillations:
-					weekend_oscillations[week] = 0;
-					p = 1;
-				}
+					//std::cout << '#';
 
-				// Too many backtracks in current week:
-				if (!p && !weekends_planning && backtracks[_d_w(_days[day])] > 10) {
+					// Deadlock break machanism:
+					// Count 50 is experimentally selected.
+					if (++k > deadlock_count) {
+						p = 1;
+						break;
+					}
 
-					//std::cout << "w";
+					// Check allocation for current shift.
+				} while (_allocation_valid(_d_j(_days[day]) + shift) != 0);
 
-					int week = _d_w(_days[day]);
+				// If deadlock occurred then close day:
+				if (p) break;
 
-					// Select rest of weekends starting with current weekend:
-					_select_weekends(week);
+				// Mark allocated ants:
+				_update_used_ants(_d_j(_days[day]) + shift);
+			}
 
-					// Clear schedule for rest of weekends:
-					_clear_weekends(week);
 
-					// After rescheduling weekends algorithm should jump back to 
-					// the day before jump to weekends.
+
+
+
+			// If deadlock occurred, then clear 3 last days
+			// and allocate them again:
+			if (p && day >= 1) {
+				//std::cout << "d";
+
+				// Go back at most three days:
+				days_back = 0;
+				while (week == _d_w(_days[day - days_back]) && days_back <= 3) 
+					++days_back;
+				--days_back;
+
+				// If tries to go back further then to the beginnig of current week then suppress:
+				if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
 					days_back = 0;
-					/*while (week == _d_w(_days[day - days_back])) {
-						_clear_day(_days[day]);
-						++days_back;
+
+				// If saturday is planning then shouldn't go further back in time:
+				if (_days[day] % 7 == 5)
+					days_back = 0;
+
+				if (_working_day_d(_days[day]))
+					// Increment backtracks for current week:
+					backtracks[_d_w(_days[day])]++;
+				else if(_days[day] % 7 == 5)
+					// Can't mix weekends if saturday is complete: 
+					_select_weekends(_d_w(_days[day]));
+
+				// Go back in days:
+				_clear_last_days(day, days_back);
+				day -= days_back + 1;
+
+			}
+
+
+
+
+
+			// Go back one day if algorithm can't go to further days:
+			++too_many_tries_for_day;
+			if (!p && day >= 1 && (too_many_tries_for_day > 10)) {
+				//std::cout << "t";
+
+				// Go back one day:
+				days_back = 2;
+
+				// If tries to go back further then to the beginnig of current week then suppress:
+				if (week != _d_w(_days[day - days_back]))
+					days_back = 0;
+
+				// If saturday is planning then shouldn't go further back in time:
+				if (_days[day] % 7 == 5)
+					days_back = 0;
+
+				if (_working_day_d(_days[day]))
+					// Increment backtracks for current week:
+					backtracks[_d_w(_days[day])]++;
+				else if (_days[day] % 7 == 5)
+					// Can't mix weekends if saturday is complete: 
+					_select_weekends(_d_w(_days[day]));
+
+				// Go back in days:
+				_clear_last_days(day, days_back);
+				day -= days_back + 1;
+
+				too_many_tries_for_day = 0;
+				p = 1;
+			}
+
+
+
+
+			// If some ant exceed hours in period, then clear at most 2 days 
+			// or clear allocation to last monday and allocate again:
+			/*if(!p && day >= 1)
+				for (int ant = 0; ant < _no_ants; ++ant)
+					if (!_hard_constraint->exceed_hours(_ants[ant])) {
+						std::cout << "e";
+						// Go back one day:
+						days_back = 1;
+
+						// If tries to go back further then to the beginnig of current week then suppress:
+						if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
+							days_back = 0;
+
+						// If saturday is planning then shouldn't go further back in time:
+						if (_days[day] % 7 == 5)
+							days_back = 0;
+
+						if (_working_day_d(_days[day]))
+							// Increment backtracks for current week:
+							backtracks[_d_w(_days[day])]++;
+						else if (_days[day] % 7 == 5)
+							// Can't mix weekends if saturday is complete: 
+							_select_weekends(_d_w(_days[day]));
+
+						// Go back in days:
+						_clear_last_days(day, days_back);
+						day -= days_back + 1;
+							
+						p = 1;
+						break;
 					}*/
 
-					_clear_last_days(day, days_back); // clear current day
-					day_before_jump = day /*- days_back + 1*/;
+			// If some ant has to many consecutive shifts, then clear last 
+			// day and allocate again:
+			/*if(!p && day >= 1)
+				for (int ant = 0; ant < _no_ants; ++ant)
+					if (!_hard_constraint->consecutive_shifts(_ants[ant])) {
+						std::cout << "c";
+						// Go back one day:
+						days_back = 1;
 
-					// Zero backtracks for current week:
-					backtracks[week] = 0;
+						// If tries to go back further then to the beginnig of current week then suppress:
+						if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
+							days_back = 0;
 
-					// Jump to weekend:
-					day = 2 * week - 1;
+						// If saturday is planning then shouldn't go further back in time:
+						if (_days[day] % 7 == 5)
+							days_back = 0;
 
-					// Set planning weekend flag - if reschedule:
-					weekends_planning = 1;
+						if (_working_day_d(_days[day]))
+							// Increment backtracks for current week:
+							backtracks[_d_w(_days[day])]++;
+						else if (_days[day] % 7 == 5)
+							// Can't mix weekends if saturday is complete: 
+							_select_weekends(_d_w(_days[day]));
 
-					p = 1;
-				}
+						// Go back in days:
+						_clear_last_days(day, days_back);
+						day -= days_back + 1;
 
-				// If any of above hard constrain has failed and 
-				// difference between current day and renew day 
-				/*if (p && day >= 4) {
-					if (/*old >= 5 && (old - back) <= 3 && (++s % 20) == 0) {
+						p = 1;
+						break;
+					}*/
 
-						++subperiod;
-						if (subperiod == 300) {
-							_clear_last_days(day, day);
-							day -= day + 1;
-							s = 0;
-							subperiod = 0;
-							old = 0;
-							back = 0;
-							_select_weekends();
-							break;
-						}
+			// If some ant has too many nights, 
+			// then clear last day and allocate again:
+			/*if(!p && day >= 1)
+				for (int ant = 0; ant < _no_ants; ++ant)
+					if (!_hard_constraint->maximum_number_of_nights(_ants[ant])) {
+						std::cout << "n";
 
-						//if(day <= 6)
-							
+						// Go back one day:
+						days_back = 1;
 
-						//if(day < 6)
-							_select_correct_shift_distribution();
-						
-						_clear_last_days(day, 4);
-						day -= 5;
-						s = 0;
-					}
-					old = 0;
-					back = 0;
-					break;
-				}*/
+						// If tries to go back further then to the beginnig of current week then suppress:
+						if (_d_w(_days[day]) != _d_w(_days[day - days_back]))
+							days_back = 0;
 
-				// Print progress bar - the day until the allocation is valid:
-				std::cout << std::setw(3) << day << " ";
-				for (int d = 0; d < _no_days; ++d) {
-					if (d <= day) std::cout << '#';
-					else std::cout << ' ';
-				}
-				std::cout << "\r";
-				//std::cout << "\n";
-				//std::cout << " " << day << "\n";
-				// Now check rest of the hard constraints
-				
-			} while ((h = _hard_constraint_validation()) != 0);
+						// If saturday is planning then shouldn't go further back in time:
+						if (_days[day] % 7 == 5)
+							days_back = 0;
+						//std::cout << " " << day << "\n";
+						if (_working_day_d(_days[day]))
+							// Increment backtracks for current week:
+							backtracks[_d_w(_days[day])]++;
+						else if (_days[day] % 7 == 5)
+							// Can't mix weekends if saturday is complete: 
+							_select_weekends(_d_w(_days[day]));
+
+						// Go back in days:
+						_clear_last_days(day, days_back);
+						day -= days_back + 1;
+
+						p = 1;
+						break;
+					}*/
+
+
+
+
+			// Print progress bar - the day until the allocation is valid:
+			std::cout << std::setw(3) << day << " ";
+			for (int d = 0; d < _no_days; ++d) {
+				if (d <= day) std::cout << '#';
+				else std::cout << ' ';
+			}
+			std::cout << "\r";
 
 			if (p) continue;
 
@@ -483,6 +441,9 @@ void ACO::run(int iterations) {
 		print_solution();
 		count_hours();
 		count_weekends();
+
+		std::cout << "Count of broken hard constraints for this results: " << _check_results(_routes) << std::endl;
+
 		//print_pheromones();
 
 		// Close if cost is zero - no further optimization needed:
@@ -491,7 +452,7 @@ void ACO::run(int iterations) {
 		if (_maximum_duration != 0 && td >= _maximum_duration) break;
 	}
 
-	std::cout << "Count of broken hard constraints for this results: " << _check_results(_routes) << std::endl;
+	//std::cout << "Count of broken hard constraints for this results: " << _check_results(_routes) << std::endl;
 
 	// Print ending optimization statistics:
 	std::cout << std::endl << " Program has ended optimization." << std::endl;
@@ -502,9 +463,56 @@ void ACO::run(int iterations) {
 	return;
 }
 
+
+void ACO::_initialize_shift_permutations() {
+	int i = 0;
+	for (int d = 0; d < 10; ++d) {
+		do {
+			std::memcpy((void*)&s36[i][0], (const void*)&d1_12[d][0], 5 * sizeof(int));
+			++i;
+		} while (std::next_permutation(&d1_12[d][0], &d1_12[d][5]));
+	}
+
+	i = 0;
+	for (int d = 0; d < 3; ++d) {
+		do {
+			std::memcpy((void*)&s32[i][0], (const void*)&d13[d][0], 5 * sizeof(int));
+			++i;
+		} while (std::next_permutation(&d13[d][0], &d13[d][5]));
+	}
+
+	i = 0;
+	for (int d = 0; d < 5; ++d) {
+		do {
+			std::memcpy((void*)&s20[i][0], (const void*)&d14_16[d][0], 5 * sizeof(int));
+			++i;
+		} while (std::next_permutation(&d14_16[d][0], &d14_16[d][5]));
+	}
+	return;
+}
+
 void ACO::_select_correct_shift_distribution() {
 	do {
-		for (int week = 0; week < 5; ++week) {
+
+		for (int ant = 0; ant < 12; ++ant)
+			_shift_distribution[ant] = s36[rand() % 260];
+		
+		_shift_distribution[12] = s32[rand() % 51];
+
+		for (int ant = 13; ant < _no_ants; ++ant) 
+			_shift_distribution[ant] = s20[rand() % 50];
+		
+
+		/*for (int week = 0; week < 5; ++week) {
+
+			for (int ant = 0; ant < 12; ++ant) {
+				_shift_distribution[ant][week] = 3 + rand() % 4;
+			}
+			_shift_distribution[12][week] = 3 + rand() % 3;
+			for (int ant = 13; ant < _no_ants; ++ant) {
+				_shift_distribution[ant][week] = 1 + rand() % 4;
+			}
+
 			for (int ant = 0; ant < 12; ++ant) {
 				_shift_distribution[ant] = d1_12[rand() % 10];
 			}
@@ -512,55 +520,22 @@ void ACO::_select_correct_shift_distribution() {
 			for (int ant = 13; ant < _no_ants; ++ant) {
 				_shift_distribution[ant] = d14_16[rand() % 10];
 			}
-		}
+		}*/
 	} while (!_is_correct_shift_distribution());
 }
 
 bool ACO::_is_correct_shift_distribution() {
 	int sum = 0;
+
 	for (int week = 0; week < 5; ++week) {
 		sum = 0;
 		for (int ant = 0; ant < _no_ants; ++ant) 
 			sum += _shift_distribution[ant][week];
 		// At least 64 shifts per week:
-		if (sum < 64) return false;
+		if (sum < 64 || sum > 65) return false;
 	}
 	return true;
 }
-
-/*void ACO::_select_ants_for_weekend() {
-	// In this set mustn't be any repeat
-	do {
-		for (int i = 0; i < 3; ++i) {
-			_weekend_ants[i] = rand() % 16;
-			for (int j = 0; j < i; ++j)
-				if (_weekend_ants[i] == _weekend_ants[j])
-					--i; // repeat selection for this position
-		}
-	} while (!_correct_weekend_selection());
-}
-
-bool ACO::_correct_weekend_selection() {
-	int k;
-	char* ptr;
-	for (int ant = 0; ant < 3; ++ant) {
-		ptr = _routes[_weekend_ants[ant]];
-		for (int sat = 0; sat < 5; ++sat) {
-			k = _sat_j(sat);
-			// Every ant must have at least 2 weekends off:
-			if ((ptr[k + REST] + ptr[k + 5 + REST]) >= 2)
-				return false;
-		}
-	}
-	return true;
-}
-
-bool ACO::_has_weekend_off(int ant) {
-	for (int i = 0; i < 3; ++i)
-		if (_weekend_ants[i] == ant)
-			return true;
-	return false;
-}*/
 
 void ACO::_shuffle_days() {
 	for (int i = 0; i < 5; ++i) {
@@ -577,78 +552,6 @@ void ACO::_shuffle_days() {
 			++day;
 		}
 	}
-
-
-	/*for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 4;
-		++day;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 0;
-		_days[day + 1] = 7 * weeks[w] + 1;
-		day += 2;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 2;
-		_days[day + 1] = 7 * weeks[w] + 3;
-		day += 2;
-	}*/
-
-	/*for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 5;
-		++day;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 6;
-		++day;
-	}*/
-
-	/*for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 4;
-		++day;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 0;
-		++day;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 2;
-		++day;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 3;
-		++day;
-	}
-
-	for (int w = 0; w < 5; ++w) {
-		_days[day] = 7 * weeks[w] + 1;
-		++day;
-	}
-
-	/*int day = 10;
-	for (int i = 0; i < _no_days; ++i) {
-		//if (!(i % 7 == 5 || i % 7 == 6)) {
-		if (!(i % 7 == 5 || i % 7 == 6)) {
-			if (day % 2 == 0) 
-				_days[day] = i;
-			++day;
-		}
-	}
-
-	day = 10;
-	for (int i = 0; i < _no_days; ++i) {
-		if (!((34 - i) % 7 == 5 || (34 - i) % 7 == 6)){
-			if(day % 2 == 1) 
-				_days[day] = 34 - i;
-			++day;
-		}
-	}*/
 }
 
 void ACO::initialize() {
@@ -657,6 +560,10 @@ void ACO::initialize() {
 	_hard_constraint = new HardConstraint(_routes, _no_ants, _no_days);
 	_soft_constraint = new SoftConstraint(_routes, _no_ants, _no_days);
 	_result = new Result(_no_ants, _no_days, _no_shifts);
+
+	_result->begin(_area);
+	_result->import_one_week(week_file);
+
 }
 
 void ACO::say_hello() {
@@ -678,6 +585,10 @@ void ACO::prepare(const char* filename) {
 		throw HardConstraintException("Unable to open input file.");
 
 	std::cout << "Read file: " << filename << std::endl;
+
+	count_hours();
+	count_weekends();
+
 	std::cout << "Count of broken hard constraints for this results: " << _check_results(_routes) << std::endl;
 
 	_update_pheromones();
@@ -692,7 +603,18 @@ void ACO::_route(int ant, int d, int shift) {
 	day = _j_d(shift);
 	week = _d_w(day) + 1;
 
-	
+	// If ant has too many shifts in period:
+	int shifts = 0;
+	int k = 0;
+	char* ptr = _routes[ant];
+	for (int s = 0; s < _no_days; ++s) {
+		k = _d_j(s);
+		shifts += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
+	}
+	if ((ant < 12 && shifts >= 23) || (ant == 12 && shifts >= 20) || (ant > 12 && shifts >= 13))
+		return;
+
+	// 
 	if (ant > 12) {
 		ant_r = rand() % 101;
 		if (ant_r < 67)
@@ -757,7 +679,7 @@ char ACO::_roulette() {
 int ACO::_hard_constraint_validation() {
 	int s, whole_shifts = _no_days * _no_shifts;
 
-	for (int ant = 0; ant < _no_ants; ++ant) {
+	/*for (int ant = 0; ant < _no_ants; ++ant) {
 		s = 0;
 		//s += _hard_constraint->only_one_shift_per_day(ant);
 		//s += _hard_constraint->exceed_hours(ant);
@@ -769,7 +691,7 @@ int ACO::_hard_constraint_validation() {
 		s += _hard_constraint->consecutive_nights(ant);
 		//s += _hard_constraint->consecutive_shifts(ant);
 		if ((3 - s) != 0) return (3 - s);
-	}
+	}*/
 
 	return 0;
 }
@@ -783,49 +705,51 @@ int ACO::_check_results(char **results) {
 	HardConstraint hard_constraint(results, _no_ants, _no_days);
 	hard_constraint.set_days(_no_days);
 
-	cout << "\n\nShifts:\n";
+	cout << "\n\nShifts left unassigned:\n";
 	for (int shift = 0; shift < whole_shifts; ++shift) {
 		k = !hard_constraint.cover_fulfilled(shift);
 		if (k) cout << (int)shift << " ";
 		s += k;
 	}
-	cout << "\n\nAnts:\n";
+	cout << "\n\nBroken hard constraints:\n";
 
 	for (int ant = 0; ant < _no_ants; ++ant) {
+		cout << (ant < 10 ? " " : "") << ant << " | ";
+
 		k = !hard_constraint.only_one_shift_per_day(ant);
-		if (k) cout << "[" << (int)ant << "] " << "2 ";
+		if (k) cout << "2, ";
 		s += k;
 
 		k = !hard_constraint.exceed_hours(ant);
-		if (k) cout << "[" << (int)ant << "] " << "3 ";
+		if (k) cout << "3, ";
 		s += k;
 
 		k = !hard_constraint.maximum_number_of_nights(ant);
-		if (k) cout << "[" << (int)ant << "] " << "4 ";
+		if (k) cout << "4, ";
 		s += k;
 
 		k = !hard_constraint.weekends_off(ant);
-		if (k) cout << "[" << (int)ant << "] " << "5 ";
+		if (k) cout << "5, ";
 		s += k;
 
 		k = !hard_constraint.rest_hours_after_nights(ant);
-		if (k) cout << "[" << (int)ant << "] " << "6 ";
+		if (k) cout << "6, ";
 		s += k;
 
 		k = !hard_constraint.rest_hours_in_any_consecutive_24_period(ant);
-		if (k) cout << "[" << (int)ant << "] " << "7 ";
+		if (k) cout << "7, ";
 		s += k;
 
 		k = !hard_constraint.rest_hours_following_night(ant);
-		if (k) cout << "[" << (int)ant << "] " << "8 ";
+		if (k) cout << "8, ";
 		s += k;
 
 		k = !hard_constraint.consecutive_nights(ant);
-		if (k) cout << "[" << (int)ant << "] " << "9 ";
+		if (k) cout << "9, ";
 		s += k;
 
 		k = !hard_constraint.consecutive_shifts(ant);
-		if (k) cout << "[" << (int)ant << "] " << "10 ";
+		if (k) cout << "10, ";
 		s += k;
 
 		cout << "\n";
@@ -834,7 +758,18 @@ int ACO::_check_results(char **results) {
 }
 
 int ACO::_allocation_valid(int shift) {
-	return !_hard_constraint->cover_fulfilled(shift);
+	if (!_hard_constraint->cover_fulfilled(shift))
+		return 1;
+
+	for (int ant = 0; ant < _no_ants; ++ant)
+		if (!_hard_constraint->maximum_number_of_nights(ant) || 
+			!_hard_constraint->consecutive_shifts(ant) ||
+			!_hard_constraint->rest_hours_after_nights(ant) ||
+			!_hard_constraint->rest_hours_in_any_consecutive_24_period(ant) ||
+			!_hard_constraint->consecutive_nights(ant))
+			return 1;
+
+	return 0;
 }
 
 int ACO::_shifts_per_week_valid(int ant, int day) {
@@ -865,7 +800,7 @@ int ACO::_enough_shifts_per_week(int ant, int day) {
 		if ((ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT]) == 1)
 			shifts++;
 	}
-	//return (shifts >= _shift_distribution[ant][week] + 1);
+	//return (shifts >= _shift_distribution[ant][week]);
 
 	if (ant < 12) return (shifts >= 5);
 	else if (ant == 12) return (shifts >= 4);
@@ -1103,14 +1038,19 @@ int ACO::_shift_r(int ant, int d) {
 	return 0;
 }
 
-void ACO::_shuffle_ants(int times) {
+void ACO::_shuffle_ants(int day) {
 	int ant1, ant2;
-	for (int t = 0; t < times; ++t)
+	int week = _d_w(day);
+	int **distrib = _shift_distribution;
+
+	std::sort(_ants, _ants + 16, [=](const int a, const int b) -> bool {return (distrib[a][week] > distrib[b][week]); });
+
+	/*for (int t = 0; t < times; ++t)
 		for (int ant = 0; ant < _no_ants; ++ant) {
 			ant1 = rand() % _no_ants;
 			ant2 = rand() % _no_ants;
 			std::swap(_ants[ant1], _ants[ant2]);
-		}
+		}*/
 }
 
 int ACO::_D(int j) {
@@ -1129,6 +1069,7 @@ void ACO::_initialize() {
 	_initialize_pheromones();
 	_initialize_heuristics();
 	_initialize_solution();
+	_initialize_area();
 	_initialize_routes();
 	_initialize_probabilities();
 	_initialize_ants();
@@ -1145,6 +1086,7 @@ void ACO::_deallocate() {
 	_deallocate_pheromones();
 	_deallocate_heuristics();
 	_deallocate_solution();
+	_deallocate_area();
 	_deallocate_routes();
 	_deallocate_probabilities();
 	_deallocate_ants();
@@ -1274,15 +1216,15 @@ void ACO::_deallocate_solution() {
 	return;
 }
 
-void ACO::_initialize_routes() {
+void ACO::_initialize_area() {
 	try {
-		int whole_shifts = _no_days * _no_shifts;
+		int whole_shifts = (_no_days + 7) * _no_shifts;
 		// Route structures: alloacate ants row:
-		_routes = new char*[_no_ants] {nullptr};
+		_area = new char*[_no_ants] {nullptr};
 
 		// Alloacate structures:
 		for (int ant = 0; ant < _no_ants; ++ant)
-			_routes[ant] = new char[whole_shifts] {0};
+			_area[ant] = new char[whole_shifts] {0};
 	}
 	catch (std::bad_alloc) {
 		throw ACOException("Solution allocation error");
@@ -1290,9 +1232,40 @@ void ACO::_initialize_routes() {
 	return;
 }
 
-void ACO::_deallocate_routes() {
+void ACO::_deallocate_area() {
 	for (int ant = 0; ant < _no_ants; ++ant)
-		delete[] _routes[ant];
+		delete[] _area[ant];
+	delete[] _area;
+	_area = nullptr;
+	return;
+}
+
+void ACO::_initialize_routes() {
+	try {
+		int whole_shifts = _no_days * _no_shifts;
+		// Route structures: alloacate ants row:
+		_routes = new char*[_no_ants] {nullptr};
+
+		// Alloacate structures:
+		/*for (int ant = 0; ant < _no_ants; ++ant)
+			_routes[ant] = new char[whole_shifts] {0};*/
+
+		for (int ant = 0; ant < _no_ants; ++ant)
+			_routes[ant] = &_area[ant][35];
+		
+
+	}
+	catch (std::bad_alloc) {
+		throw ACOException("Solution allocation error");
+	}
+
+
+	return;
+}
+
+void ACO::_deallocate_routes() {
+	//for (int ant = 0; ant < _no_ants; ++ant)
+	//	delete[] _routes[ant];
 	delete[] _routes;
 	_routes = nullptr;
 	return;
@@ -1465,8 +1438,8 @@ void ACO::print_solution() {
 
 	for (int ant = 0; ant < _no_ants; ++ant) {
 		cout << (ant < 10 ? " " : "") << ant << " |";
-		for (int j = 0; j < (_no_shifts*_no_days); ++j) {
-			cout << (int)_routes[ant][j];
+		for (int j = 0; j < (_no_shifts*(_no_days + 7)); ++j) {
+			cout << (int)_area[ant][j];
 			if (j % _no_shifts == (_no_shifts - 1)) cout << "|";
 			if (_j_d(j) % 7 == 6 && j % _no_shifts == REST) cout << "|";
 		}
@@ -1496,23 +1469,33 @@ void ACO::count_hours() {
 
 	int d = 0, k = 0, s = 0, sum = 0;
 	char *ptr;
+	int hours[5] = {0,0,0,0,0};
+
+	cout << endl << "Hour statistics:" << endl;
 	for (int ant = 0; ant < _no_ants; ++ant) {
 		ptr = _routes[ant];
 		sum = 0;
-		cout << "[" << ant << "] ";
+		cout << (ant < 10 ? " " : "") << ant << " |";
 		for (int week = 0; week < 5; ++week) {
 			for (int day = 0; day < 7; ++day) {
 				d = 7 * week + day;
 				k = _es_j(d);
 				s += ptr[k + EARLY] + ptr[k + DAY] + ptr[k + LATE] + ptr[k + NIGHT];
 			}
-			cout << week + 1 << ": " << s * 8 << ", ";
+			cout << week + 1 << ": " << s * 8 << " | ";
+			hours[week] += s * 8;
 			sum += s;
 			s = 0;
 		}
-		cout << sum * 8;
+		cout << "total shifts: " << sum << ", total hours: " << sum * 8;
 		cout << "\n";
 	}
+
+	cout << "\nTotal amount of hours in weeks:\n";
+	for (int week = 0; week < 5; ++week)
+		cout << week + 1 << ": " << hours[week] << " | ";
+	cout << endl;
+
 	return;
 }
 
@@ -1522,6 +1505,8 @@ void ACO::count_weekends() {
 	
 	int w = 0, k;
 	char *ptr;
+
+	cout << endl << "Number of weekends off:" << endl;
 	for (int ant = 0; ant < _no_ants; ++ant) {
 		ptr = _routes[ant];
 		w = 0;
@@ -1530,8 +1515,9 @@ void ACO::count_weekends() {
 			if ((ptr[k + REST] + ptr[k + 5 + REST]) == 2)
 				w++;
 		}
-		cout << "[" << ant << "] " << w << endl;
+		cout << (ant < 10 ? " " : "") << ant << " | " << w << endl;
 	}
+	cout << endl;
 
 	return;
 }

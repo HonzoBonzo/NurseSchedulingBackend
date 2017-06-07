@@ -29,6 +29,7 @@ public:
 	
 	inline int max_duration(int duration = -1) { if (duration >= 0) _maximum_duration = duration; return _maximum_duration; }
 	inline int min_cost(int cost = 0) { _minimum_cost = cost; return _minimum_cost; }
+	inline const char* week_filename(const char* filename = nullptr) { if (filename != nullptr) week_file = filename; return week_file; }
 
 	void print_solution();
 	void print_pheromones();
@@ -100,6 +101,7 @@ private:
 	void _initialize_pheromones();
 	void _initialize_heuristics();
 	void _initialize_solution();
+	void _initialize_area();
 	void _initialize_routes();
 	void _initialize_probabilities();
 	void _initialize_ants();
@@ -107,6 +109,7 @@ private:
 	void _initialize_allocations();
 	void _initialize_used_ants();
 	void _initialize_days();
+	void _initialize_shift_permutations();
 
 	void _deallocate();
 	void _deallocate_graph();
@@ -114,6 +117,7 @@ private:
 	void _deallocate_pheromones();
 	void _deallocate_heuristics();
 	void _deallocate_solution();
+	void _deallocate_area();
 	void _deallocate_routes();
 	void _deallocate_probabilities();
 	void _deallocate_ants();
@@ -129,6 +133,7 @@ private:
 
 	double _alpha, _beta, _q, _ro, _taumin, _taumax;
 	int _minimum_cost, _maximum_duration;
+	const char* week_file;
 
 	HardConstraint *_hard_constraint, _hc;
 	SoftConstraint *_soft_constraint;
@@ -138,6 +143,7 @@ private:
 	int *_ants, *_costs, *_allocations, *_used_ants;
 	int _best_total_cost;
 	double **_pheromones, **_delta_pheromones, **_heuristics;
+	char **_area;
 	char *_graph, **_routes, **_solution, **_connections, _selected_weekends[16], _shifts_per_week[16][5];
 	std::pair<char, double> *_probabilities;
 	char _weekends[10][2] = { { 1,2 },{ 1,3 },{ 1,4 },{ 1,5 },{ 2,3 },{ 2,4 },{ 2,5 },{ 3,4 },{ 3,5 },{ 4,5 } };
@@ -148,9 +154,11 @@ private:
 	int _weekend_ants[7];
 	int _days[35];
 
-	int d1_12[10][5] = { {5,5,5,4,4}, {5,5,4,5,4}, {5,4,5,5,4}, {4,5,5,5,4}, {4,5,5,4,5}, {4,5,4,5,5}, {4,4,5,5,5}, {5,4,5,4,5}, {5,4,4,5,5}, {5,5,4,4,5} };
-	int d13[1][5] = { {4,4,4,4,4} };
-	int d14_16[10][5] = { {3,3,3,2,2}, {3,3,2,3,2}, {3,2,3,3,2}, {2,3,3,3,2}, {2,3,3,2,3}, {2,3,2,3,3}, {2,2,3,3,3}, {3,2,3,2,3}, {3,2,2,3,3}, {3,3,2,2,3} };
+	int d1_12[10][5] = { {3,5,5,5,5}, {4,4,5,5,5}, {4,4,4,5,5}, {3,4,5,5,5}, {4,4,4,4,6}, {3,3,4,6,6}, {3,4,4,6,6}, {3,4,4,5,6}, {3,4,5,5,6}, {3,3,5,6,6} };
+	int d13[3][5] = { {4,4,4,4,4}, {3,4,4,4,5}, {3,3,4,5,5} };
+	int d14_16[5][5] = { {1,3,3,3,3}, {2,2,3,3,3}, {2,2,2,3,3}, {1,2,3,3,3}, {0,3,3,3,3} };
+
+	int s36[260][5], s32[51][5], s20[50][5];
 
 };
 

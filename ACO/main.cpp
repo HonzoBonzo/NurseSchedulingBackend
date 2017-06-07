@@ -9,13 +9,13 @@
 #include "ACO.h"
 
 // if (ALPHA == 0) { stochastic search & sub-optimal route }
-#define ALPHA			(double) 1.0
+#define ALPHA			(double) 0.8
 
 // if (BETA  == 0) { sub-optimal route }
 #define BETA			(double) 1.0
 
 // Pheromones evaporation. 
-#define RO				(double) 0.01
+#define RO				(double) 0.05
 
 // Minimum pheromone random number.
 #define TAUMIN			(double) 1.0
@@ -23,14 +23,48 @@
 // Maximum pheromone random number.
 #define TAUMAX			(double) 1000.0
 
-int main() {
+int main(int argc, char** argv) {
+
+	int iteration, duration, cost;
+	const char* filename;
+
+	iteration = 1000;
+	duration = 0;
+	cost = 0;
+	filename = "firstWeek.txt";
+
+	if (argc <= 1)
+		std::cout << "Default argument values accepted." << std::endl;
+
+	// Argument parsing:
+	if (argc >= 2) {
+		iteration = std::atoi(argv[1]);
+		if (iteration <= 0) {
+			std::cout << "Invalid iterations count!" << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+
+	if (argc >= 3) {
+		duration = std::atoi(argv[2]);
+		if (duration <= 0)
+			std::cout << "Unlimited optimisation time." << std::endl;
+	}
+
+	if (argc >= 4) {
+		cost = std::atoi(argv[3]);
+		if(cost <= 0)
+			std::cout << "Minimum cost level set to zero." << std::endl;
+	}
+
+	if (argc >= 5)
+		filename = argv[4];
+	
 
 	// Number of days to plan:
 	int no_days = 7 * 5;
 	// Number of employee:
 	int no_ants = 16;
-	// Maximum number of iterations:
-	int iterations = 50;
 
 	try {
 		// Create instance of ACO class:
@@ -43,8 +77,9 @@ int main() {
 		aco.tau_max(TAUMAX);
 		aco.evaporation(RO);
 
-		aco.min_cost(0);
-		aco.max_duration(0*10 * 60); // 10 minutes
+		aco.min_cost(cost);
+		aco.max_duration(duration);
+		aco.week_filename(filename);
 
 		// Make initialization:
 		aco.initialize();
@@ -52,12 +87,15 @@ int main() {
 
 		// Prepare graph and pheromones matrix for optimization 
 		// by reading results from file:
-		//aco.prepare("data1.in");
+		//aco.prepare("schedule-5000.txt");
+		//aco.prepare("schedule-4000.txt");
+		//aco.prepare("schedule-3000.txt");
+		//aco.prepare("schedule-2000.txt");
 
 		//aco.print_solution();
 
 		// Run ACO optimization:
-		aco.run(iterations);
+		aco.run(iteration);
 	} 
 	catch (ACOException me) {
 		std::cerr << me.what() << std::endl;

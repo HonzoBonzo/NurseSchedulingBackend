@@ -68,6 +68,36 @@ bool Result::export_into(const char* filename) {
 	return false;
 }
 
+bool Result::import_one_week(const char* filename) {
+	std::ifstream file;
+	std::string line;
+	line.reserve(100);
+	char *record = (char*)line.c_str();
+	int employee;
+
+	file.open(filename, std::ios::in);
+	if (file.is_open()) {
+
+		employee = 0;
+		while (file.getline(record, 100) && employee < _no_employess) {
+			//std::cout << record << std::endl;
+			for (int d = 0; d < 7; ++d) {
+				if (record[2 * (4 * d + EARLY)] == '1') _result[employee][5 * d + EARLY] = 1;
+				else if (record[2 * (4 * d + DAY)] == '1') _result[employee][5 * d + DAY] = 1;
+				else if (record[2 * (4 * d + LATE)] == '1') _result[employee][5 * d + LATE] = 1;
+				else if (record[2 * (4 * d + NIGHT)] == '1') _result[employee][5 * d + NIGHT] = 1;
+				else _result[employee][5 * d + REST] = 1;
+			}
+			++employee;
+		}
+
+		file.close();
+		return true;
+	}
+	return false;
+	return false;
+}
+
 bool Result::log(const char* filename, int it, double td, double id, int tc, int bc) {
 
 	using std::stringstream;
