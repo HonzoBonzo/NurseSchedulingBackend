@@ -305,6 +305,10 @@ public class Schedule {
 		ArrayList<Integer> nursesNotChecked = null;
 		ArrayList<Integer> nursesOnSaturday = null;
 		ArrayList<Integer> nursesOnSaturdayCopy = new ArrayList<Integer>();
+		
+		ArrayList<Integer> nursesOnFriday = null;
+		ArrayList<Integer> nursesOnFridayCopy = new ArrayList<Integer>();
+		
 		ArrayList<Integer> nursesToCheckFirst = new ArrayList<Integer>();
 		nursesToCheckFirst.add(new Integer(13));
 		nursesToCheckFirst.add(new Integer(14));
@@ -315,12 +319,16 @@ public class Schedule {
 		for (int shift = 28; shift < 42 * 4; shift++) {
 			nursesNotChecked = fillNursesNotCheckedList(nursesNotChecked);
 			nursesOnSaturday = copyList(nursesOnSaturdayCopy);
+			nursesOnFriday = copyList(nursesOnFridayCopy);
 
 			// is new week?
 			if (shift % 28 == 0) {
 				clearNurseDataWeekly();
 				nursesOnSaturday = new ArrayList<Integer>();
 				nursesOnSaturdayCopy = new ArrayList<Integer>();
+				
+				nursesOnFriday = new ArrayList<Integer>();
+				nursesOnFridayCopy = new ArrayList<Integer>();
 			}
 
 			// is new day?
@@ -339,12 +347,27 @@ public class Schedule {
 
 			while (true) {
 
-				if (NurseCalculations.checkIfItIsSunday(shift) && nursesOnSaturday.size() > 0) {
+				if (NurseCalculations.checkIfItIsSunday(shift) && nursesOnSaturday.size() > 0  ) {
 					// je�li to niedziela to najpierw spr�buj przydzieli�
 					// t� z
-					// soboty
+					// soboty 
 					nurseId = NurseCalculations.randomNurseDraw(nursesOnSaturday);
 					nursesOnSaturday.remove(new Integer(nurseId));
+				}
+				else if (NurseCalculations.checkIfItIsSunday(shift) && nursesOnFriday.size() > 0 && nursesOnSaturday.size() == 0 ) {
+					// je�li to niedziela to najpierw spr�buj przydzieli�
+					// t� z
+					// piatku late i night
+					nurseId = NurseCalculations.randomNurseDraw(nursesOnFriday);
+					nursesOnFriday.remove(new Integer(nurseId));
+				}
+
+				else if (NurseCalculations.checkIfItIsSaturday(shift) && nursesOnFriday.size() > 0) {
+					// je�li to sobota to najpierw spr�buj przydzieli�
+					// t� z
+					// piatku late i night
+					nurseId = NurseCalculations.randomNurseDraw(nursesOnFriday);
+					nursesOnFriday.remove(new Integer(nurseId));
 				}
 
 				// tutaj wpadaj� zmiany dzienne z dni powszednich
@@ -371,6 +394,13 @@ public class Schedule {
 						nursesOnSaturday.add(new Integer(nurseId));
 						nursesOnSaturdayCopy.add(new Integer(nurseId));
 					}
+					
+					if (NurseCalculations.checkIfItIsFridayLateOrNight(shift)) {
+						nursesOnFriday.add(new Integer(nurseId));
+						nursesOnFridayCopy.add(new Integer(nurseId));
+					}
+					
+					
 					setSchedule(nurseId, shift);
 					// TODO
 					Nurse nurse = NurseManager.getNurse(nurseId);

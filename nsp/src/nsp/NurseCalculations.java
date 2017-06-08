@@ -75,6 +75,15 @@ public class NurseCalculations {
 		return day % 7;
 	}
 	
+	
+	public static boolean checkIfItIsFridayLateOrNight(int shift){
+		int value = shift % 28;
+		if (value == 18 || value == 19)
+			return true;
+		else
+			return false;
+	}
+	
 	public static boolean checkIfItIsSaturday(int shift){
 		int value = shift % 28;
 		if (value >= 20 && value < 24)
